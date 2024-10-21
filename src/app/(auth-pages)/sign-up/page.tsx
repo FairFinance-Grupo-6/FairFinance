@@ -105,7 +105,7 @@ export default function Signup({ searchParams }: { searchParams: Message }) {
             <Input
               type="email"
               name="email"
-              placeholder="you@example.com"
+              placeholder="Tucorreo@ejemplo.com"
               value={formData.email}
               onChange={handleChange}
               required
@@ -164,7 +164,6 @@ export default function Signup({ searchParams }: { searchParams: Message }) {
             onChange={handleChange}
             minLength={6}
             required
-            className="w-full p-3 bg-white text-black rounded-lg border"
           />
           <button
             type="button"
@@ -191,7 +190,7 @@ export default function Signup({ searchParams }: { searchParams: Message }) {
           </Link>
         </p>
 
-        <p className="mt-2 text-center text-white">
+        <p className="text-sm text text-foreground mb-4">
           <input type="checkbox" required /> Reconozco que he leído los{" "}
           <Link href="/terms" className="underline font-medium text-[#FF5035]">
             términos y condiciones

@@ -8,23 +8,26 @@ import Link from "next/link";
 export default function Login({ searchParams }: { searchParams: Message }) {
   return (
     <form className="flex-1 flex flex-col min-w-64">
-      <h1 className="text-2xl font-medium">Sign in</h1>
+      <h1 className="text-2xl font-medium">Bienvenido@</h1>
       <p className="text-sm text-foreground">
-        Don't have an account?{" "}
+        Nos alegra verte de nuevo.
+      </p>
+      <p className="text-sm text-foreground">
+        ¿No tienes una cuentas?{" "}
         <Link className="text-foreground font-medium underline" href="/sign-up">
-          Sign up
+          Registrate
         </Link>
       </p>
       <div className="flex flex-col gap-2 [&>input]:mb-3 mt-8">
         <Label htmlFor="email">Email</Label>
         <Input name="email" placeholder="you@example.com" required />
         <div className="flex justify-between items-center">
-          <Label htmlFor="password">Password</Label>
+          <Label htmlFor="password">Contraseña</Label>
           <Link
             className="text-xs text-foreground underline"
             href="/forgot-password"
           >
-            Forgot Password?
+            Olvidate tu contraseña?
           </Link>
         </div>
         <Input
@@ -33,8 +36,8 @@ export default function Login({ searchParams }: { searchParams: Message }) {
           placeholder="Your password"
           required
         />
-        <SubmitButton pendingText="Signing In..." formAction={signInAction}>
-          Sign in
+        <SubmitButton pendingText="Iniciando sesión..." formAction={signInAction}>
+          Inicia sesión
         </SubmitButton>
         <FormMessage message={searchParams} />
       </div>
