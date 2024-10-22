@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { createClient } from "../../../utils/supabase/client";
 
 // Define un usuario constante
+
 const mockUser = {
   email: "usuario@example.com",
   name: "Usuario Ejemplo",
@@ -11,15 +12,18 @@ const mockUser = {
 
 export default function Dashboard() {
   const [user, setUser] = useState<typeof mockUser | null>(null); // Cambia el tipo aquí
-  const router = useRouter();
 
   useEffect(() => {
     // Simula la autenticación y establece el usuario
     const checkUser = () => {
-      // Aquí simplemente asignamos el usuario constante
-      setUser(mockUser);
-    };
+      createClient().auth.getUser().then(({ data }) => {
+        mockUser.email = data.user?.email || "";
+        mockUser.name = data.user?.email?.split("@")[0] || "";
 
+        setUser(mockUser);
+      });
+      // Aquí simplemente asignamos el usuario constante
+    };
     checkUser();
   }, []);
 

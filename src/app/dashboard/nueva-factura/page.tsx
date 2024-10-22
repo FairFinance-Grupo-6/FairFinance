@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { FaMinusCircle } from "react-icons/fa"; // Asegúrate de tener react-icons instalado
 
 const mockUser = {
@@ -23,7 +22,7 @@ const formatNumber = (num: number): string => {
 
 // Función para parsear el string formateado de vuelta a número
 const parseFormattedNumber = (str: string): number => {
-  return Number(str.replace(/[^0-9-]+/g,""));
+  return Number(str.replace(/[^0-9-]+/g, ""));
 };
 
 export default function Dashboard() {
@@ -33,7 +32,7 @@ export default function Dashboard() {
     issueDate: "",
     dueDate: "",
     discountDays: 0,
-    extraCosts: [{ description: "", amount: 0 }],
+    extraCosts: [{ id: Date.now(), description: "", amount: 0 }],
     transportationCosts: 0,
     totalAmount: 0,
     currency: "soles",
@@ -45,7 +44,6 @@ export default function Dashboard() {
     tcea: 0,
   });
 
-  const router = useRouter();
 
   const [formattedTotalAmount, setFormattedTotalAmount] = useState("");
   const [formattedTasa, setFormattedTasa] = useState("");
@@ -68,10 +66,10 @@ export default function Dashboard() {
         if (name.includes("Description")) {
           extraCosts[index].description = value;
         } else {
-          extraCosts[index].amount = parseFloat(value);
+          extraCosts[index].amount = Number.parseFloat(value);
         }
       } else {
-        extraCosts.push({ description: "", amount: parseFloat(value) });
+        extraCosts.push({ id: Date.now(), description: "", amount: Number.parseFloat(value) });
       }
       setInvoice({ ...invoice, extraCosts });
     } else {
@@ -93,7 +91,7 @@ export default function Dashboard() {
   };
 
   const addExtraCost = () => {
-    setInvoice({ ...invoice, extraCosts: [...invoice.extraCosts, { description: "", amount: 0 }] });
+    setInvoice({ ...invoice, extraCosts: [...invoice.extraCosts, { id: Date.now(), description: "", amount: 0 }] });
   };
 
   const removeExtraCost = (index: number) => {
@@ -104,67 +102,49 @@ export default function Dashboard() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const tcea = calculateTCEA(); 
+    const tcea = calculateTCEA();
     setInvoice(prev => ({ ...prev, tcea }));
     console.log("Calculando TCEA...");
   };
 
   const calculateTCEA = () => {
     const { totalAmount, discountCost, extraCosts, transportationCosts, discountDays } = invoice;
-  
+
     const valorNeto = totalAmount - discountCost;
-  
+
     let totalExtraCosts = 0;
     let retencion = 0;
     let gastosAdministrativos = 0;
-  
-    extraCosts.forEach((cost) => {
+
+    for (const cost of extraCosts) {
       totalExtraCosts += cost.amount;
       if (cost.description.toLowerCase() === 'retencion') {
         retencion += cost.amount;
       } else if (cost.description.toLowerCase() === 'gastos de admin') {
         gastosAdministrativos += cost.amount;
       }
-    });
-  
+    }
+
     const valorRecibido = valorNeto - totalExtraCosts - retencion;
-  
+
     const valorEntregado = valorRecibido + transportationCosts + gastosAdministrativos - retencion;
-  
-    const tcea = valorRecibido > 0 ? (Math.pow((valorEntregado / valorRecibido), (360 / discountDays)) - 1) : 0;
-  
-    return tcea * 100; 
+
+    const tcea = valorRecibido > 0 ? ((valorEntregado / valorRecibido) ** (360 / discountDays) - 1) : 0;
+
+    return tcea * 100;
   };
-  
+
 
   const handleUploadInvoice = () => {
     console.log("Factura subida");
   };
- 
-  const handleCancel = () => {
-    setInvoice({
-      invoiceNumber: "",
-      issueDate: "",
-      dueDate: "",
-      discountDays: 0,
-      extraCosts: [{ description: "", amount: 0 }],
-      transportationCosts: 0,
-      totalAmount: 0,
-      currency: "PEN",
-      tipoTasa: "efectiva",
-      tiempoTasa: "ANUAL",
-      capitalizacion: "ANUAL",
-      tasa: 0,
-      discountCost: 0,
-      tcea: 0,
-    });
-  };
+
 
   const handleTotalAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     const numericValue = parseFormattedNumber(value);
-    
-    if (!isNaN(numericValue)) {
+
+    if (!Number.isNaN(numericValue)) {
       setInvoice(prev => ({ ...prev, totalAmount: numericValue }));
       setFormattedTotalAmount(formatNumber(numericValue));
     }
@@ -172,9 +152,9 @@ export default function Dashboard() {
 
   const handleTasaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace('%', ''); // Elimina el símbolo % si existe
-    const numericValue = parseFloat(value);
-    
-    if (!isNaN(numericValue) || value === '') {
+    const numericValue = Number.parseFloat(value);
+
+    if (!Number.isNaN(numericValue) || value === '') {
       setInvoice(prev => ({ ...prev, tasa: value === '' ? 0 : numericValue }));
       setFormattedTasa(value === '' ? '' : `${value}%`);
     }
@@ -190,9 +170,10 @@ export default function Dashboard() {
         <form onSubmit={handleSubmit} className="flex flex-col md:flex-row gap-8">
           <div className="w-full md:w-1/3 space-y-6">
             <div>
-              <label className="block text-gray-700 dark:text-gray-300 mb-2">1. ID de factura:</label>
+              <label htmlFor="invoiceNumber" className="block text-gray-700 dark:text-gray-300 mb-2">1. ID de factura:</label>
               <input
                 type="text"
+                id="invoiceNumber"
                 name="invoiceNumber"
                 value={invoice.invoiceNumber}
                 onChange={handleInputChange}
@@ -202,9 +183,10 @@ export default function Dashboard() {
               />
             </div>
             <div>
-              <label className="block text-gray-700 dark:text-gray-300 mb-2">2. Seleccione la fecha de emisión:</label>
+              <label htmlFor="issueDate" className="block text-gray-700 dark:text-gray-300 mb-2">2. Seleccione la fecha de emisión:</label>
               <input
                 type="date"
+                id="issueDate"
                 name="issueDate"
                 value={invoice.issueDate}
                 onChange={handleInputChange}
@@ -213,9 +195,10 @@ export default function Dashboard() {
               />
             </div>
             <div>
-              <label className="block text-gray-700 dark:text-gray-300 mb-2">3. Seleccione la fecha de vencimiento:</label>
+              <label htmlFor="dueDate" className="block text-gray-700 dark:text-gray-300 mb-2">3. Seleccione la fecha de vencimiento:</label>
               <input
                 type="date"
+                id="dueDate"
                 name="dueDate"
                 value={invoice.dueDate}
                 onChange={handleInputChange}
@@ -224,7 +207,7 @@ export default function Dashboard() {
               />
             </div>
             <div>
-              <label className="block text-gray-700 dark:text-gray-300 mb-2">4. Valor del importe inicial:</label>
+              <label htmlFor="totalAmount" className="block text-gray-700 dark:text-gray-300 mb-2">4. Valor del importe inicial:</label>
               <input
                 type="text"
                 name="totalAmount"
@@ -239,7 +222,7 @@ export default function Dashboard() {
 
           <div className="w-full md:w-1/2 space-y-6">
             <div>
-              <label className="block text-gray-700 dark:text-gray-300 mb-2">5. Seleccione la moneda:</label>
+              <label htmlFor="currency" className="block text-gray-700 dark:text-gray-300 mb-2">5. Seleccione la moneda:</label>
               <div className="flex space-x-4">
                 <label className="inline-flex items-center">
                   <input
@@ -266,9 +249,9 @@ export default function Dashboard() {
               </div>
             </div>
             <div>
-              <label className="block text-gray-700 dark:text-gray-300 mb-2">6. Costos adicionales:</label>
+              <label htmlFor="extraCosts" className="block text-gray-700 dark:text-gray-300 mb-2">6. Costos adicionales:</label>
               {invoice.extraCosts.map((cost, index) => (
-                <div key={index} className="flex items-center space-x-2 mb-2">
+                <div key={cost.id} className="flex items-center space-x-2 mb-2">
                   <input
                     type="text"
                     name={`extraCostDescription${index}`}
@@ -303,7 +286,7 @@ export default function Dashboard() {
               </button>
             </div>
             <div>
-              <label className="block text-gray-700 dark:text-gray-300 mb-2">7. Selecciones tipo de tasa:</label>
+              <label htmlFor="tipoTasa" className="block text-gray-700 dark:text-gray-300 mb-2">7. Selecciones tipo de tasa:</label>
               <div className="flex items-center space-x-4">
                 <label className="inline-flex items-center">
                   <input
@@ -330,8 +313,9 @@ export default function Dashboard() {
               </div>
             </div>
             <div>
-              <label className="block text-gray-700 dark:text-gray-300 mb-2">8. Seleccione el tiempo de la tasa:</label>
+              <label htmlFor="tiempoTasa" className="block text-gray-700 dark:text-gray-300 mb-2">8. Seleccione el tiempo de la tasa:</label>
               <select
+                id="tiempoTasa"
                 name="tiempoTasa"
                 value={invoice.tiempoTasa}
                 onChange={handleInputChange}
@@ -348,8 +332,9 @@ export default function Dashboard() {
 
           <div className="w-full md:w-1/3 space-y-6">
             <div>
-              <label className="block text-gray-700 dark:text-gray-300 mb-2">9. Seleccione la capitalización:</label>
+              <label htmlFor="capitalizacion" className="block text-gray-700 dark:text-gray-300 mb-2">9. Seleccione la capitalización:</label>
               <select
+                id="capitalizacion"
                 name="capitalizacion"
                 value={invoice.capitalizacion}
                 onChange={handleInputChange}
@@ -363,7 +348,7 @@ export default function Dashboard() {
               </select>
             </div>
             <div>
-              <label className="block text-gray-700 dark:text-gray-300 mb-2">10. Ingrese el valor de la tasa:</label>
+              <label htmlFor="tasa" className="block text-gray-700 dark:text-gray-300 mb-2">10. Ingrese el valor de la tasa:</label>
               <div className="relative">
                 <input
                   type="text"
@@ -377,9 +362,10 @@ export default function Dashboard() {
               </div>
             </div>
             <div>
-              <label className="block text-gray-700 dark:text-gray-300 mb-2">11. Ingrese los portes:</label>
+              <label htmlFor="transportationCosts" className="block text-gray-700 dark:text-gray-300 mb-2">11. Ingrese los portes:</label>
               <input
                 type="number"
+                id="transportationCosts"
                 name="transportationCosts"
                 value={invoice.transportationCosts}
                 onChange={handleInputChange}
@@ -398,10 +384,10 @@ export default function Dashboard() {
           </div>
         </form>
       </div>
-      
+
       <div className="w-1/3 space-y-6">
         <div className="mb-6">
-          <label className="block text-gray-700 dark:text-gray-300 mb-2">¿Tiene Mora?</label>
+          <label htmlFor="showAdditionalInfoYes" className="block text-gray-700 dark:text-gray-300 mb-2">¿Tiene Mora?</label>
           <div className="flex space-x-4">
             <label className="inline-flex items-center">
               <input
@@ -440,8 +426,9 @@ export default function Dashboard() {
           <h3 className="text-lg font-semibold mb-4">Resumen</h3>
           <div className="space-y-4">
             <div>
-              <label className="block text-gray-700 mb-2">Descuento:</label>
+              <label htmlFor="discountCost" className="block text-gray-700 mb-2">Descuento:</label>
               <input
+                id="discountCost"
                 type="text"
                 value={formatNumber(invoice.discountCost)}
                 readOnly
@@ -449,8 +436,9 @@ export default function Dashboard() {
               />
             </div>
             <div>
-              <label className="block text-gray-700 mb-2">TCEA:</label>
+              <label htmlFor="tcea" className="block text-gray-700 mb-2">TCEA:</label>
               <input
+                id="tcea"
                 type="text"
                 value={`${invoice.tcea.toFixed(2)}%`}
                 readOnly

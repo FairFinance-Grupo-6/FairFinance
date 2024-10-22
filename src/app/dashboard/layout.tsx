@@ -5,7 +5,6 @@ import { hasEnvVars } from "@/../utils/supabase/check-env-vars";
 import { GeistSans } from "geist/font/sans";
 import { ThemeProvider } from "next-themes";
 import Link from "next/link";
-import "./globals.css";
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -17,7 +16,7 @@ export const metadata = {
   description: "The app for managing your finances.",
 };
 
-export default function RootLayout({
+export default function DashBoardLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -36,7 +35,9 @@ export default function RootLayout({
               <nav className="w-full flex justify-center border-b border-b-foreground/10 h-16">
                 <div className="w-full max-w-5xl flex justify-between items-center p-3 px-5 text-sm">
                   <div className="flex gap-5 items-center font-semibold">
-                    <Link href={"/"}>Fair Finance</Link>
+                    <h1>Fair Finance</h1>
+                    <Link href={"/dashboard"}>Dashboard</Link>
+                    <Link href={"/dashboard/nueva-factura"}>Nueva factura</Link>
                   </div>
                   <div className="flex gap-5 items-center">
                     {!hasEnvVars ? <EnvVarWarning /> : <HeaderAuth />}
