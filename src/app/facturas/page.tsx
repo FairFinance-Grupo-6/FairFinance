@@ -9,16 +9,21 @@ const mockUser = {
   name: "Usuario Ejemplo",
 };
 
-const currencies = [
-  { value: "PEN", label: "PEN" },
-  { value: "USD", label: "USD" },
-  { value: "EUR", label: "EUR" },
-  // Puedes agregar más opciones de moneda aquí
+const tiempoTasaOptions = [
+  "Anual", "Semestral", "Cuatrimestral", "Trimestral", "Bimestral", "Mensual", "Quincenal", "Diario"
 ];
 
-const formatCurrency = (value: number) => {
-  if (isNaN(value)) return '';
-  return new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(value);
+// Función para formatear el número solo con comas para los miles
+const formatNumber = (num: number): string => {
+  return new Intl.NumberFormat('es-PE', {
+    maximumFractionDigits: 0, // Sin decimales
+    useGrouping: true // Usa separadores de miles
+  }).format(num);
+};
+
+// Función para parsear el string formateado de vuelta a número
+const parseFormattedNumber = (str: string): number => {
+  return Number(str.replace(/[^0-9-]+/g,""));
 };
 
 export default function Dashboard() {
@@ -31,14 +36,20 @@ export default function Dashboard() {
     extraCosts: [{ description: "", amount: 0 }],
     transportationCosts: 0,
     totalAmount: 0,
-    currency: "PEN",
-    nominalRate: 0,
-    effectiveRate: 0,
+    currency: "soles",
+    tipoTasa: "efectiva",
+    tiempoTasa: "ANUAL",
+    capitalizacion: "ANUAL",
+    tasa: 0,
     discountCost: 0,
     tcea: 0,
   });
 
   const router = useRouter();
+
+  const [formattedTotalAmount, setFormattedTotalAmount] = useState("");
+  const [formattedTasa, setFormattedTasa] = useState("");
+  const [showAdditionalInfo, setShowAdditionalInfo] = useState(false);
 
   useEffect(() => {
     const checkUser = () => {
@@ -66,9 +77,7 @@ export default function Dashboard() {
     } else {
       setInvoice(prev => {
         const updatedInvoice = { ...prev, [name]: value };
-        // Calcular el costo de descuento automáticamente
-        const discountCost = calculateDiscountCost(updatedInvoice);
-        return { ...updatedInvoice, discountCost };
+        return { ...updatedInvoice };
       });
     }
 
@@ -93,24 +102,9 @@ export default function Dashboard() {
     setInvoice({ ...invoice, extraCosts });
   };
 
-  const calculateDiscountCost = (invoiceData: typeof invoice) => {
-    const TEA = invoiceData.effectiveRate / 100; // Convertir a decimal
-    const diasDescuento = invoiceData.discountDays;
-
-    // Cálculo de TE(dias)d
-    const TE_dias_d = Math.pow((1 + TEA), (diasDescuento / 360)) - 1;
-
-    // Cálculo de Tasa de Descuento
-    const tasaDescuento = TE_dias_d / (1 + TE_dias_d);
-
-    // Cálculo de Costo de Descuento
-    return tasaDescuento * invoiceData.totalAmount;
-  };
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Aquí puedes agregar la lógica para calcular la TCEA
-    const tcea = calculateTCEA(); // Implementa esta función según tu lógica
+    const tcea = calculateTCEA(); 
     setInvoice(prev => ({ ...prev, tcea }));
     console.log("Calculando TCEA...");
   };
@@ -118,10 +112,8 @@ export default function Dashboard() {
   const calculateTCEA = () => {
     const { totalAmount, discountCost, extraCosts, transportationCosts, discountDays } = invoice;
   
-    // Calcular Valor Neto
     const valorNeto = totalAmount - discountCost;
   
-    // Calcular gastos extras y retenciones
     let totalExtraCosts = 0;
     let retencion = 0;
     let gastosAdministrativos = 0;
@@ -135,26 +127,21 @@ export default function Dashboard() {
       }
     });
   
-    // Calcular Valor Recibido
     const valorRecibido = valorNeto - totalExtraCosts - retencion;
   
-    // Calcular Valor Entregado
     const valorEntregado = valorRecibido + transportationCosts + gastosAdministrativos - retencion;
   
-    // Calcular TCEA
     const tcea = valorRecibido > 0 ? (Math.pow((valorEntregado / valorRecibido), (360 / discountDays)) - 1) : 0;
   
-    return tcea * 100; // Convertir a porcentaje
+    return tcea * 100; 
   };
   
 
   const handleUploadInvoice = () => {
-    // Lógica para subir la factura
     console.log("Factura subida");
   };
  
   const handleCancel = () => {
-    // Lógica para cancelar, por ejemplo, restablecer el formulario
     setInvoice({
       invoiceNumber: "",
       issueDate: "",
@@ -164,210 +151,322 @@ export default function Dashboard() {
       transportationCosts: 0,
       totalAmount: 0,
       currency: "PEN",
-      nominalRate: 0,
-      effectiveRate: 0,
+      tipoTasa: "efectiva",
+      tiempoTasa: "ANUAL",
+      capitalizacion: "ANUAL",
+      tasa: 0,
       discountCost: 0,
       tcea: 0,
     });
   };
 
+  const handleTotalAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    const numericValue = parseFormattedNumber(value);
+    
+    if (!isNaN(numericValue)) {
+      setInvoice(prev => ({ ...prev, totalAmount: numericValue }));
+      setFormattedTotalAmount(formatNumber(numericValue));
+    }
+  };
+
+  const handleTasaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace('%', ''); // Elimina el símbolo % si existe
+    const numericValue = parseFloat(value);
+    
+    if (!isNaN(numericValue) || value === '') {
+      setInvoice(prev => ({ ...prev, tasa: value === '' ? 0 : numericValue }));
+      setFormattedTasa(value === '' ? '' : `${value}%`);
+    }
+  };
 
   if (!user) {
     return <div>Loading...</div>;
   }
 
   return (
-    <div className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
-      <h1 className="text-3xl font-bold text-gray-800 dark:text-white">Agregar Nueva Factura</h1>
-      <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-gray-700 dark:text-gray-300">Número de FACTURA:</label>
-            <input
-              type="text"
-              name="invoiceNumber"
-              value={invoice.invoiceNumber}
-              onChange={handleInputChange}
-              className="border border-gray-300 dark:border-gray-600 p-2 w-full rounded-lg"
-              placeholder="Ingrese número de factura"
-              required
-            />
+    <div className="flex">
+      <div className="w-3/4 pr-8">
+        <form onSubmit={handleSubmit} className="flex flex-col md:flex-row gap-8">
+          <div className="w-full md:w-1/3 space-y-6">
+            <div>
+              <label className="block text-gray-700 dark:text-gray-300 mb-2">1. ID de factura:</label>
+              <input
+                type="text"
+                name="invoiceNumber"
+                value={invoice.invoiceNumber}
+                onChange={handleInputChange}
+                className="border border-gray-300 dark:border-gray-600 p-2 w-full rounded-lg"
+                placeholder="Ingrese id de factura"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-gray-700 dark:text-gray-300 mb-2">2. Seleccione la fecha de emisión:</label>
+              <input
+                type="date"
+                name="issueDate"
+                value={invoice.issueDate}
+                onChange={handleInputChange}
+                className="border border-gray-300 dark:border-gray-600 p-2 w-full rounded-lg"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-gray-700 dark:text-gray-300 mb-2">3. Seleccione la fecha de vencimiento:</label>
+              <input
+                type="date"
+                name="dueDate"
+                value={invoice.dueDate}
+                onChange={handleInputChange}
+                className="border border-gray-300 dark:border-gray-600 p-2 w-full rounded-lg"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-gray-700 dark:text-gray-300 mb-2">4. Valor del importe inicial:</label>
+              <input
+                type="text"
+                name="totalAmount"
+                value={formattedTotalAmount}
+                onChange={handleTotalAmountChange}
+                className="border border-gray-300 dark:border-gray-600 p-2 w-full rounded-lg"
+                placeholder="Ingrese el valor del importe inicial"
+                required
+              />
+            </div>
           </div>
-          <div>
-            <label className="block text-gray-700 dark:text-gray-300">Fecha de emisión:</label>
-            <input
-              type="date"
-              name="issueDate"
-              value={invoice.issueDate}
-              onChange={handleInputChange}
-              className="border border-gray-300 dark:border-gray-600 p-2 w-full rounded-lg"
-              required
-            />
+
+          <div className="w-full md:w-1/2 space-y-6">
+            <div>
+              <label className="block text-gray-700 dark:text-gray-300 mb-2">5. Seleccione la moneda:</label>
+              <div className="flex space-x-4">
+                <label className="inline-flex items-center">
+                  <input
+                    type="radio"
+                    name="currency"
+                    value="PEN"
+                    checked={invoice.currency === "PEN"}
+                    onChange={handleInputChange}
+                    className="form-radio text-blue-600 dark:text-blue-400"
+                  />
+                  <span className="ml-2 text-gray-700 dark:text-gray-300">Soles (PEN)</span>
+                </label>
+                <label className="inline-flex items-center">
+                  <input
+                    type="radio"
+                    name="currency"
+                    value="USD"
+                    checked={invoice.currency === "USD"}
+                    onChange={handleInputChange}
+                    className="form-radio text-blue-600 dark:text-blue-400"
+                  />
+                  <span className="ml-2 text-gray-700 dark:text-gray-300">Dólares (USD)</span>
+                </label>
+              </div>
+            </div>
+            <div>
+              <label className="block text-gray-700 dark:text-gray-300 mb-2">6. Costos adicionales:</label>
+              {invoice.extraCosts.map((cost, index) => (
+                <div key={index} className="flex items-center space-x-2 mb-2">
+                  <input
+                    type="text"
+                    name={`extraCostDescription${index}`}
+                    value={cost.description}
+                    onChange={e => handleInputChange(e, index)}
+                    placeholder="Descripción"
+                    className="border border-gray-300 dark:border-gray-600 p-2 w-1/2 rounded-lg"
+                  />
+                  <input
+                    type="number"
+                    name={`extraCostAmount${index}`}
+                    value={cost.amount}
+                    onChange={e => handleInputChange(e, index)}
+                    placeholder="Monto"
+                    className="border border-gray-300 dark:border-gray-600 p-2 w-1/2 rounded-lg"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeExtraCost(index)}
+                    className="text-red-500 dark:text-red-400"
+                  >
+                    <FaMinusCircle size={20} />
+                  </button>
+                </div>
+              ))}
+              <button
+                type="button"
+                onClick={addExtraCost}
+                className="text-blue-600 dark:text-blue-400 mt-2"
+              >
+                + Agregar costo adicional
+              </button>
+            </div>
+            <div>
+              <label className="block text-gray-700 dark:text-gray-300 mb-2">7. Selecciones tipo de tasa:</label>
+              <div className="flex items-center space-x-4">
+                <label className="inline-flex items-center">
+                  <input
+                    type="radio"
+                    name="tipoTasa"
+                    value="efectiva"
+                    checked={invoice.tipoTasa === "efectiva"}
+                    onChange={handleInputChange}
+                    className="form-radio text-blue-600 dark:text-blue-400"
+                  />
+                  <span className="ml-2 text-gray-700 dark:text-gray-300">Efectiva</span>
+                </label>
+                <label className="inline-flex items-center">
+                  <input
+                    type="radio"
+                    name="tipoTasa"
+                    value="nominal"
+                    checked={invoice.tipoTasa === "nominal"}
+                    onChange={handleInputChange}
+                    className="form-radio text-blue-600 dark:text-blue-400"
+                  />
+                  <span className="ml-2 text-gray-700 dark:text-gray-300">Nominal</span>
+                </label>
+              </div>
+            </div>
+            <div>
+              <label className="block text-gray-700 dark:text-gray-300 mb-2">8. Seleccione el tiempo de la tasa:</label>
+              <select
+                name="tiempoTasa"
+                value={invoice.tiempoTasa}
+                onChange={handleInputChange}
+                className="border border-gray-300 dark:border-gray-600 p-2 w-full rounded-lg"
+              >
+                {tiempoTasaOptions.map(option => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
-          <div>
-            <label className="block text-gray-700 dark:text-gray-300">Fecha de vencimiento:</label>
-            <input
-              type="date"
-              name="dueDate"
-              value={invoice.dueDate}
-              onChange={handleInputChange}
-              className="border border-gray-300 dark:border-gray-600 p-2 w-full rounded-lg"
-              required
-            />
+
+          <div className="w-full md:w-1/3 space-y-6">
+            <div>
+              <label className="block text-gray-700 dark:text-gray-300 mb-2">9. Seleccione la capitalización:</label>
+              <select
+                name="capitalizacion"
+                value={invoice.capitalizacion}
+                onChange={handleInputChange}
+                className="border border-gray-300 dark:border-gray-600 p-2 w-full rounded-lg"
+              >
+                {tiempoTasaOptions.map(option => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-gray-700 dark:text-gray-300 mb-2">10. Ingrese el valor de la tasa:</label>
+              <div className="relative">
+                <input
+                  type="text"
+                  name="tasa"
+                  value={formattedTasa}
+                  onChange={handleTasaChange}
+                  className="border border-gray-300 dark:border-gray-600 p-2 w-full rounded-lg pr-8"
+                  placeholder="Ingrese la tasa"
+                  required
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-gray-700 dark:text-gray-300 mb-2">11. Ingrese los portes:</label>
+              <input
+                type="number"
+                name="transportationCosts"
+                value={invoice.transportationCosts}
+                onChange={handleInputChange}
+                className="border border-gray-300 dark:border-gray-600 p-2 w-full rounded-lg"
+                required
+              />
+            </div>
+            <div>
+              <button
+                type="submit"
+                className="bg-blue-600 text-white p-2 w-full rounded-lg hover:bg-blue-700 dark:hover:bg-blue-500"
+              >
+                Calcular TCEA
+              </button>
+            </div>
           </div>
-          <div>
-            <label className="block text-gray-700 dark:text-gray-300">Días de descuento:</label>
-            <input
-              type="number"
-              name="discountDays"
-              value={invoice.discountDays}
-              readOnly
-              className="border border-gray-300 dark:border-gray-600 p-2 w-full rounded-lg bg-gray-200 dark:bg-gray-600"
-            />
+        </form>
+      </div>
+      
+      <div className="w-1/3 space-y-6">
+        <div className="mb-6">
+          <label className="block text-gray-700 dark:text-gray-300 mb-2">¿Tiene Mora?</label>
+          <div className="flex space-x-4">
+            <label className="inline-flex items-center">
+              <input
+                type="radio"
+                name="showAdditionalInfo"
+                value="yes"
+                checked={showAdditionalInfo}
+                onChange={() => setShowAdditionalInfo(true)}
+                className="form-radio text-blue-600 dark:text-blue-400"
+              />
+              <span className="ml-2 text-gray-700 dark:text-gray-300">Sí</span>
+            </label>
+            <label className="inline-flex items-center">
+              <input
+                type="radio"
+                name="showAdditionalInfo"
+                value="no"
+                checked={!showAdditionalInfo}
+                onChange={() => setShowAdditionalInfo(false)}
+                className="form-radio text-blue-600 dark:text-blue-400"
+              />
+              <span className="ml-2 text-gray-700 dark:text-gray-300">No</span>
+            </label>
           </div>
         </div>
 
-        <div>
-          <label className="block text-gray-700 dark:text-gray-300">Importe Inicial:</label>
-          <input
-            type="number"
-            name="totalAmount"
-            value={invoice.totalAmount}
-            onChange={handleInputChange}
-            className="border border-gray-300 dark:border-gray-600 p-2 w-full rounded-lg"
-            required
-          />
-        </div>
+        {showAdditionalInfo && (
+          <div className="bg-gray-100 p-4 rounded-lg">
+            <h3 className="text-lg font-semibold mb-4">Información Adicional</h3>
+            {/* Aquí puedes agregar los campos de información adicional */}
+            <p>Contenido de información adicional...</p>
+          </div>
+        )}
 
-        <h3 className="text-xl font-semibold mt-6 text-gray-800 dark:text-white">Gastos Extras:</h3>
-        {invoice.extraCosts.map((cost, index) => (
-          <div key={index} className="flex gap-4 mb-4">
-            <input
-              type="text"
-              name={`extraCostDescription-${index}`}
-              placeholder="Descripción"
-              value={cost.description}
-              onChange={(e) => handleInputChange(e, index)}
-              className="border border-gray-300 dark:border-gray-600 p-2 w-full rounded-lg"
-              required
-            />
-            <input
-              type="number"
-              name={`extraCostAmount-${index}`}
-              placeholder="Monto"
-              value={cost.amount}
-              onChange={(e) => handleInputChange(e, index)}
-              className="border border-gray-300 dark:border-gray-600 p-2 w-1/4 rounded-lg"
-              required
-            />
+        <div className="bg-orange-100 p-4 rounded-lg">
+          <h3 className="text-lg font-semibold mb-4">Resumen</h3>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-gray-700 mb-2">Descuento:</label>
+              <input
+                type="text"
+                value={formatNumber(invoice.discountCost)}
+                readOnly
+                className="border border-gray-300 p-2 w-full rounded-lg bg-white"
+              />
+            </div>
+            <div>
+              <label className="block text-gray-700 mb-2">TCEA:</label>
+              <input
+                type="text"
+                value={`${invoice.tcea.toFixed(2)}%`}
+                readOnly
+                className="border border-gray-300 p-2 w-full rounded-lg bg-white"
+              />
+            </div>
             <button
               type="button"
-              onClick={() => removeExtraCost(index)}
-              className="text-red-500 hover:text-red-600"
+              onClick={handleUploadInvoice}
+              className="bg-blue-500 text-white p-2 w-full rounded-lg hover:bg-blue-600 transition"
             >
-              <FaMinusCircle size={24} />
+              Subir Factura
             </button>
           </div>
-        ))}
-        <button
-          type="button"
-          onClick={addExtraCost}
-          className="bg-green-500 text-white p-2 rounded-lg hover:bg-green-600 transition"
-        >
-          + Agregar Gasto Extra
-        </button>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-          <div>
-            <label className="block text-gray-700 dark:text-gray-300">Portes:</label>
-            <input
-              type="number"
-              name="transportationCosts"
-              value={invoice.transportationCosts}
-              onChange={handleInputChange}
-              className="border border-gray-300 dark:border-gray-600 p-2 w-full rounded-lg"
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-gray-700 dark:text-gray-300">Moneda:</label>
-            <select
-              name="currency"
-              value={invoice.currency}
-              onChange={handleInputChange}
-              className="border border-gray-300 dark:border-gray-600 p-2 w-full rounded-lg"
-            >
-              {currencies.map(currency => (
-                <option key={currency.value} value={currency.value}>
-                  {currency.label}
-                </option>
-              ))}
-            </select>
-          </div>
         </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-          <div>
-            <label className="block text-gray-700 dark:text-gray-300">Tasa Nominal (%):</label>
-            <input
-              type="number"
-              name="nominalRate"
-              value={invoice.nominalRate}
-              onChange={handleInputChange}
-              className="border border-gray-300 dark:border-gray-600 p-2 w-full rounded-lg"
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-gray-700 dark:text-gray-300">Tasa Efectiva (%):</label>
-            <input
-              type="number"
-              name="effectiveRate"
-              value={invoice.effectiveRate}
-              onChange={handleInputChange}
-              className="border border-gray-300 dark:border-gray-600 p-2 w-full rounded-lg"
-              required
-            />
-          </div>
-        </div>
-
-        <div>
-          <label className="block text-gray-700 dark:text-gray-300">Descuento:</label>
-          <input
-            type="text"
-            name="discountCost"
-            value={formatCurrency(invoice.discountCost)}
-            readOnly
-            className="border border-gray-300 dark:border-gray-600 p-2 w-full rounded-lg bg-gray-200 dark:bg-gray-600"
-          />
-        </div>
-
-        <div className="w-1/2">
-            <label className="block text-gray-700 dark:text-gray-300">TCEA:</label>
-            <input
-              type="number"
-              name="tcea"
-              value={invoice.tcea}
-              readOnly
-              className="border border-gray-300 dark:border-gray-600 p-2 w-full rounded-lg bg-gray-200 dark:bg-gray-600"
-            />
-          </div>
-          <div className="w-1/2">
-            <button type="submit" className="bg-green-500 text-white px-4 py-2 rounded">
-              Calcular TCEA
-            </button>
-          </div>
-      </form>
-
-      <div className="absolute top-6 right-6 space-x-2">
-        <button onClick={handleUploadInvoice} className="bg-blue-500 text-white px-4 py-2 rounded">
-          Subir Factura
-        </button>
-        <button onClick={handleCancel} className="bg-red-500 text-white px-4 py-2 rounded">
-          Cancelar
-        </button>
       </div>
-
     </div>
   );
 }
