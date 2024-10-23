@@ -12,6 +12,10 @@ const tiempoTasaOptions = [
   "Anual", "Semestral", "Cuatrimestral", "Trimestral", "Bimestral", "Mensual", "Quincenal", "Diario"
 ];
 
+const capitalizacionOptions = [
+  "Anual", "Semestral", "Cuatrimestral", "Trimestral", "Bimestral", "Mensual", "Quincenal", "Diario"
+];
+
 // Función para formatear el número solo con comas para los miles
 const formatNumber = (num: number): string => {
   return new Intl.NumberFormat('es-PE', {
@@ -25,7 +29,7 @@ const parseFormattedNumber = (str: string): number => {
   return Number(str.replace(/[^0-9-]+/g, ""));
 };
 
-export default function Dashboard() {
+export default function NuevaFactura() {
   const [user, setUser] = useState<typeof mockUser | null>(null);
   const [invoice, setInvoice] = useState({
     invoiceNumber: "",
@@ -37,10 +41,14 @@ export default function Dashboard() {
     totalAmount: 0,
     currency: "soles",
     tipoTasa: "efectiva",
-    tiempoTasa: "ANUAL",
-    capitalizacion: "ANUAL",
+    tiempoTasa: "Anual",
+    capitalizacion: "Anual",
+    valorNeto: 0,
+    valorRecibido: 0,
+    valorEntregado: 0,
     tasa: 0,
-    discountCost: 0,
+    discount: 0,
+    discountFormatted: "",
     tcea: 0,
   });
 
@@ -56,6 +64,10 @@ export default function Dashboard() {
 
     checkUser();
   }, []);
+
+  useEffect(() => {
+    calculateDiscount();
+  }, [invoice.tasa, invoice.totalAmount, invoice.discountDays]); // Dependencias relevantes  
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>, index?: number) => {
     const { name, value } = e.target;
@@ -79,6 +91,7 @@ export default function Dashboard() {
       });
     }
 
+    // Calcular días de descuento automáticamente
     if (name === "issueDate" || name === "dueDate") {
       const issueDate = new Date(name === "issueDate" ? value : invoice.issueDate);
       const dueDate = new Date(name === "dueDate" ? value : invoice.dueDate);
@@ -88,7 +101,19 @@ export default function Dashboard() {
         setInvoice(prev => ({ ...prev, discountDays: differenceInDays }));
       }
     }
+
+    if (name === "tasa" || name === "capitalizacion") {
+      calculateDiscount(); 
+    }
+
+    if (name === "discountDays" || name === "totalAmount" || name === "tipoTasa" || name === "tiempoTasa") {
+      calculateDiscount(); 
+    }
+
+
   };
+
+
 
   const addExtraCost = () => {
     setInvoice({ ...invoice, extraCosts: [...invoice.extraCosts, { id: Date.now(), description: "", amount: 0 }] });
@@ -107,10 +132,194 @@ export default function Dashboard() {
     console.log("Calculando TCEA...");
   };
 
-  const calculateTCEA = () => {
-    const { totalAmount, discountCost, extraCosts, transportationCosts, discountDays } = invoice;
+  /*-------CALCULOS---------*/
 
-    const valorNeto = totalAmount - discountCost;
+  const calculateDiscount = () => {
+    const { totalAmount, discountDays, tasa, tipoTasa, tiempoTasa, capitalizacion } = invoice;
+    let calculatedDiscount = 0; 
+    const numericTotalAmount = Number(totalAmount);
+    const numericTasa = Number(tasa);
+    const numericDiscountDays = Number(discountDays);
+
+    console.log("Calculando descuento...");
+    console.log("Total Amount:", numericTotalAmount);
+    console.log("Discount Days:", numericDiscountDays);
+    console.log("Tasa:", numericTasa);
+
+    if (tipoTasa === "nominal" && tiempoTasa === "Anual") {
+      let m, n;
+      switch (capitalizacion) {
+        case "Anual": m = 1; n = numericDiscountDays / 360; break;
+        case "Semestral": m = 2; n = numericDiscountDays / 180; break;
+        case "Cuatrimestral": m = 3; n = numericDiscountDays / 120; break;
+        case "Trimestral": m = 4; n = numericDiscountDays / 90; break;
+        case "Bimestral": m = 6; n = numericDiscountDays / 60; break;
+        case "Mensual": m = 12; n = numericDiscountDays / 30; break;
+        case "Quincenal": m = 24; n = numericDiscountDays / 15; break;
+        case "Diario": m = 360; n = numericDiscountDays / 1; break;
+        default: m = 1; n = numericDiscountDays / 360;
+      }
+
+      const ted = Math.pow(1 + (numericTasa / 100) / m, n) - 1;
+      const d = ted / (1 + ted);
+      calculatedDiscount = numericTotalAmount * d;
+    }
+
+    if (tipoTasa === "nominal" && tiempoTasa === "Semestral") {
+      let m, n;
+      switch (capitalizacion) {
+        case "Anual": m = 2; n = numericDiscountDays / 360; break;
+        case "Semestral": m = 1; n = (numericDiscountDays / 180)*30; break;
+        case "Cuatrimestral": m = 4/6; n = (numericDiscountDays / 120)*30; break;
+        case "Trimestral": m = 3/6; n = (numericDiscountDays / 90)*30; break;
+        case "Bimestral": m = 4; n = (numericDiscountDays / 60)*30; break;
+        case "Mensual": m = 180; n = (numericDiscountDays / 30)*30; break;
+        case "Quincenal": m = 360; n = (numericDiscountDays / 15)*30; break;
+        case "Diario": m = 180; n = numericDiscountDays / 1; break;
+        default: m = 180; n = numericDiscountDays / 1;
+      }
+
+      const ted = Math.pow(1 + (numericTasa / 100) / m, n) - 1;
+      const d = ted / (1 + ted);
+      calculatedDiscount = numericTotalAmount * d;
+    }
+
+    if (tipoTasa === "nominal" && tiempoTasa === "Cuatrimestral") {
+      let m, n;
+      switch (capitalizacion) {
+        case "Anual": m = 120/360; n = (numericDiscountDays / 360)*30; break;
+        case "Semestral": m = 2; n = (numericDiscountDays / 180)*30; break;
+        case "Cuatrimestral": m = 1; n = (numericDiscountDays / 120)*30; break;
+        case "Trimestral": m = 4/3; n = (numericDiscountDays / 90)*30; break;
+        case "Bimestral": m = 2/3; n = (numericDiscountDays / 60)*30; break;
+        case "Mensual": m = 4; n = (numericDiscountDays / 30)*30; break;
+        case "Quincenal": m = 8; n = (numericDiscountDays / 15)*30; break;
+        case "Diario": m = 120; n = numericDiscountDays / 1; break;
+        default: m = 120; n = numericDiscountDays / 1;
+      }
+
+      const ted = Math.pow(1 + (numericTasa / 100) / m, n) - 1;
+      const d = ted / (1 + ted);
+      calculatedDiscount = numericTotalAmount * d;
+    }
+
+    if (tipoTasa === "nominal" && tiempoTasa === "Trimestral") {
+      let m, n;
+      switch (capitalizacion) {
+        case "Anual": m = 90/360; n = (numericDiscountDays / 360)*30; break;
+        case "Semestral": m = 6/4; n = (numericDiscountDays / 180)*30; break;
+        case "Cuatrimestral": m = 3/4; n = (numericDiscountDays / 120)*30; break;
+        case "Trimestral": m = 1; n = (numericDiscountDays / 90)*30; break;
+        case "Bimestral": m = 2/4; n = (numericDiscountDays / 60)*30; break;
+        case "Mensual": m = 3; n = (numericDiscountDays / 30)*30; break;
+        case "Quincenal": m = 6; n = (numericDiscountDays / 15)*30; break;
+        case "Diario": m = 90; n = numericDiscountDays / 1; break;
+        default: m = 90; n = numericDiscountDays / 1;
+      }
+
+      const ted = Math.pow(1 + (numericTasa / 100) / m, n) - 1;
+      const d = ted / (1 + ted);
+      calculatedDiscount = numericTotalAmount * d;
+    }
+
+    if (tipoTasa === "nominal" && tiempoTasa === "Bimestral") {
+      let m, n;
+      switch (capitalizacion) {
+        case "Anual": m = 60/360; n = (numericDiscountDays / 360)*30; break;
+        case "Semestral": m = 2/6; n = (numericDiscountDays / 180)*30; break;
+        case "Cuatrimestral": m = 2/4; n = (numericDiscountDays / 120)*30; break;
+        case "Trimestral": m = 2/3; n = (numericDiscountDays / 90)*30; break;
+        case "Bimestral": m = 1; n = (numericDiscountDays / 60)*30; break;
+        case "Mensual": m = 2; n = (numericDiscountDays / 30)*30; break;
+        case "Quincenal": m = 4; n = (numericDiscountDays / 15)*30; break;
+        case "Diario": m = 60; n = numericDiscountDays / 1; break;
+        default: m = 60; n = numericDiscountDays / 1;
+      }
+
+      const ted = Math.pow(1 + (numericTasa / 100) / m, n) - 1;
+      const d = ted / (1 + ted);
+      calculatedDiscount = numericTotalAmount * d;
+    }
+
+    if (tipoTasa === "nominal" && tiempoTasa === "Mensual") {
+      let m, n;
+      switch (capitalizacion) {
+        case "Anual": m = 30/360; n = (numericDiscountDays / 360)*30; break;
+        case "Semestral": m = 1/6; n = (numericDiscountDays / 180)*30; break;
+        case "Cuatrimestral": m = 1/4; n = (numericDiscountDays / 120)*30; break;
+        case "Trimestral": m = 1/3; n = (numericDiscountDays / 90)*30; break;
+        case "Bimestral": m = 1/2; n = (numericDiscountDays / 60)*30; break;
+        case "Mensual": m = 1; n = (numericDiscountDays / 30)*30; break;
+        case "Quincenal": m = 2; n = (numericDiscountDays / 15)*30; break;
+        case "Diario": m = 30; n = numericDiscountDays / 1; break;
+        default: m = 30; n = numericDiscountDays / 1;
+      }
+
+      const ted = Math.pow(1 + (numericTasa / 100) / m, n) - 1;
+      const d = ted / (1 + ted);
+      calculatedDiscount = numericTotalAmount * d;
+    }
+
+    if (tipoTasa === "nominal" && tiempoTasa === "Quincenal") {
+      let m, n;
+      switch (capitalizacion) {
+        case "Anual": m = 15/360; n = (numericDiscountDays / 360)*30; break;
+        case "Semestral": m = 15/6; n = (numericDiscountDays / 180)*30; break;
+        case "Cuatrimestral": m = 15/4; n = (numericDiscountDays / 120)*30; break;
+        case "Trimestral": m = 15/3; n = (numericDiscountDays / 90)*30; break;
+        case "Bimestral": m = 15/2; n = (numericDiscountDays / 60)*30; break;
+        case "Mensual": m = 15/30; n = (numericDiscountDays / 30)*30; break;
+        case "Quincenal": m = 1; n = (numericDiscountDays / 15)*30; break;
+        case "Diario": m = 15; n = numericDiscountDays / 1; break;
+        default: m = 15; n = numericDiscountDays / 1;
+      }
+
+      const ted = Math.pow(1 + (numericTasa / 100) / m, n) - 1;
+      const d = ted / (1 + ted);
+      calculatedDiscount = numericTotalAmount * d;
+    }
+
+    if (tipoTasa === "nominal" && tiempoTasa === "Diario") {
+      let m, n;
+      switch (capitalizacion) {
+        case "Anual": m = 360; n = numericDiscountDays; break;
+        case "Semestral": m = 180; n = numericDiscountDays ; break;
+        case "Cuatrimestral": m = 120; n = numericDiscountDays ; break;
+        case "Trimestral": m = 90; n = numericDiscountDays ; break;
+        case "Bimestral": m = 60; n = numericDiscountDays ; break;
+        case "Mensual": m = 30; n = numericDiscountDays ; break;
+        case "Quincenal": m = 15; n = numericDiscountDays ; break;
+        case "Diario": m = 1; n = numericDiscountDays; break;
+        default: m = 1; n = numericDiscountDays;
+      }
+
+      const ted = Math.pow(1 + (numericTasa / 100) / m, n) - 1;
+      const d = ted / (1 + ted);
+      calculatedDiscount = numericTotalAmount * d;
+    }
+
+    // Formatea el descuento a dos decimales con coma como separador de miles
+    const formattedDiscount = new Intl.NumberFormat('es-PE', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(calculatedDiscount);
+
+    // Actualiza el estado del descuento
+    setInvoice(prev => ({
+      ...prev,
+      discount: calculatedDiscount,
+      discountFormatted: formattedDiscount
+    }));
+
+    console.log("Descuento calculado:", calculatedDiscount);
+    console.log("Descuento formateado:", formattedDiscount);
+  };
+  
+
+  const calculateTCEA = () => {
+    const { totalAmount, discount, extraCosts, transportationCosts, discountDays } = invoice;
+
+    const valorNeto = totalAmount - discount;
 
     let totalExtraCosts = 0;
     let retencion = 0;
@@ -340,7 +549,7 @@ export default function Dashboard() {
                 onChange={handleInputChange}
                 className="border border-gray-300 dark:border-gray-600 p-2 w-full rounded-lg"
               >
-                {tiempoTasaOptions.map(option => (
+                {capitalizacionOptions.map(option => (
                   <option key={option} value={option}>
                     {option}
                   </option>
@@ -426,11 +635,11 @@ export default function Dashboard() {
           <h3 className="text-lg font-semibold mb-4">Resumen</h3>
           <div className="space-y-4">
             <div>
-              <label htmlFor="discountCost" className="block text-gray-700 mb-2">Descuento:</label>
+              <label htmlFor="discountFormatted" className="block text-gray-700 mb-2">Descuento:</label>
               <input
-                id="discountCost"
+                id="discountFormatted"
                 type="text"
-                value={formatNumber(invoice.discountCost)}
+                value={invoice.discountFormatted}
                 readOnly
                 className="border border-gray-300 p-2 w-full rounded-lg bg-white"
               />
