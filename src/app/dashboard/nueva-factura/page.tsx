@@ -41,6 +41,7 @@ export default function NuevaFactura() {
     totalAmount: 0,
     currency: "soles",
     tipoTasa: "efectiva",
+    tipoTasaMora: "efectiva",
     tiempoTasa: "Anual",
     capitalizacion: "Anual",
     valorNeto: 0,
@@ -625,9 +626,104 @@ export default function NuevaFactura() {
 
         {showAdditionalInfo && (
           <div className="bg-gray-100 p-4 rounded-lg">
-            <h3 className="text-lg font-semibold mb-4">Información Adicional</h3>
-            {/* Aquí puedes agregar los campos de información adicional */}
-            <p>Contenido de información adicional...</p>
+            <h3 className="text-lg font-semibold mb-4">Información de Mora</h3>
+            <div className="space-y-4">
+              <div>
+                <label htmlFor="delayDays" className="block text-gray-700 mb-2">Días de demora:</label>
+                <input
+                  type="number"
+                  id="delayDays"
+                  name="delayDays"
+                  className="border border-gray-300 p-2 w-full rounded-lg"
+                />
+              </div>
+              <div>
+              <label htmlFor="tipoTasaMora" className="block text-gray-700 dark:text-gray-300 mb-2">Selecciones tipo de tasa:</label>
+              <div className="flex items-center space-x-4">
+                <label className="inline-flex items-center">
+                  <input
+                    type="radio"
+                    name="tipoTasaMora"
+                    value="efectiva"
+                    checked={invoice.tipoTasaMora === "efectiva"}
+                    onChange={handleInputChange}
+                    className="form-radio text-blue-600 dark:text-blue-400"
+                  />
+                  <span className="ml-2 text-gray-700 dark:text-gray-300">Efectiva</span>
+                </label>
+                <label className="inline-flex items-center">
+                  <input
+                    type="radio"
+                    name="tipoTasaMora"
+                    value="nominal"
+                    checked={invoice.tipoTasaMora === "nominal"}
+                    onChange={handleInputChange}
+                    className="form-radio text-blue-600 dark:text-blue-400"
+                  />
+                  <span className="ml-2 text-gray-700 dark:text-gray-300">Nominal</span>
+                </label>
+              </div>
+            </div>
+              <div>
+              <label htmlFor="tiempoTasa" className="block text-gray-700 dark:text-gray-300 mb-2">Seleccione el tiempo de la tasa:</label>
+              <select
+                id="tiempoTasa"
+                name="tiempoTasa"
+                value={invoice.tiempoTasa}
+                onChange={handleInputChange}
+                className="border border-gray-300 dark:border-gray-600 p-2 w-full rounded-lg"
+              >
+                {tiempoTasaOptions.map(option => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
+              <div>
+              <label htmlFor="capitalizacion" className="block text-gray-700 dark:text-gray-300 mb-2">Seleccione la capitalización:</label>
+              <select
+                id="capitalizacion"
+                name="capitalizacion"
+                value={invoice.capitalizacion}
+                onChange={handleInputChange}
+                className="border border-gray-300 dark:border-gray-600 p-2 w-full rounded-lg"
+              >
+                {capitalizacionOptions.map(option => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
+            </div>
+            </div>
+              <div>
+                <label htmlFor="moratoryRateValue" className="block text-gray-700 mb-2">Ingrese el valor de tasa:</label>
+                <input
+                  type="number"
+                  id="moratoryRateValue"
+                  name="moratoryRateValue"
+                  className="border border-gray-300 p-2 w-full rounded-lg"
+                />
+              </div>
+              <div>
+                <label htmlFor="lateCommission" className="block text-gray-700 mb-2">Ingrese la comisión tardía:</label>
+                <input
+                  type="number"
+                  id="lateCommission"
+                  name="lateCommission"
+                  className="border border-gray-300 p-2 w-full rounded-lg"
+                />
+              </div>
+              <div>
+                <label htmlFor="protest" className="block text-gray-700 mb-2">Ingrese el protesto:</label>
+                <input
+                  type="number"
+                  id="protest"
+                  name="protest"
+                  className="border border-gray-300 p-2 w-full rounded-lg"
+                />
+              </div>
+            </div>
           </div>
         )}
 
