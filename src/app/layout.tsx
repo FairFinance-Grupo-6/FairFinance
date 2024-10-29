@@ -7,6 +7,7 @@ import { ThemeProvider } from "next-themes";
 import Link from "next/link";
 import "./globals.css";
 import { Suspense } from "react";
+import AuthButtonSkeleton from "@/components/skeletons/AuthButtonSkeleton";
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -24,7 +25,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="es" className={GeistSans.className} suppressHydrationWarning>
+    <html lang="es" className={GeistSans.className}>
       <body className="bg-background text-foreground">
         <ThemeProvider
           attribute="class"
@@ -38,9 +39,11 @@ export default async function RootLayout({
                 <div className="w-full max-w-5xl flex justify-between items-center p-3 px-5 text-sm">
                   <div className="flex gap-5 items-center font-semibold">
                     <Link href={"/"}>Fair Finance</Link>
+                    <Link href={"/dashboard"}>Dashboard</Link>
+                    <Link href={"/dashboard/nueva-factura"}>Nueva factura</Link>
                   </div>
                   <div className="flex gap-5 items-center">
-                    <Suspense fallback={<div>Loading...</div>}>
+                    <Suspense fallback={<AuthButtonSkeleton />}>
                       {!hasEnvVars ? <EnvVarWarning /> : <AuthButton />}
                     </Suspense>
                     <ThemeSwitcher />
