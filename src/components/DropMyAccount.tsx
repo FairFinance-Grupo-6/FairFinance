@@ -7,14 +7,16 @@ import { signOutAction } from "@/app/actions";
 
 export function DropMyAccount({ user }: { user: User }) {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-    const [mounted, setMounted] = useState(false); // Prevent server-client mismatch
+    const [mounted, setMounted] = useState(false);
 
-    // Ensure consistent rendering only after component mounts
+    // useEffect only runs on the client, so now we can safely show the UI
     useEffect(() => {
         setMounted(true);
     }, []);
 
-    if (!mounted) return null; // Avoid hydration issues
+    if (!mounted) {
+        return null;
+    };
 
     return (
         <div className="relative">
