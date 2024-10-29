@@ -4,7 +4,9 @@ export default async function profilePage() {
     const {
         data: { user },
     } = await createClient().auth.getUser();
-
+    if (!user) {
+        return null;
+    }
     return (
         <>
             <div className="container mx-auto">
