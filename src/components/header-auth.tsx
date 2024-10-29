@@ -1,9 +1,9 @@
-import { hasEnvVars } from "@/../utils/supabase/check-env-vars";
+"use server";
+import { hasEnvVars } from "@/utils/supabase/check-env-vars";
 import Link from "next/link";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
-import { createClient } from "@/../utils/supabase/server";
-import { signOutAction } from "@/app/actions";
+import { createClient } from "@/utils/supabase/server";
 import { DropMyAccount } from "./DropMyAccount";
 
 export default async function AuthButton() {
@@ -48,15 +48,17 @@ export default async function AuthButton() {
     );
   }
   return user ? (
-    <DropMyAccount user={user} signOutAction={signOutAction} />
+    <DropMyAccount user={user} />
   ) : (
-    <div className="flex gap-2">
-      <Button asChild size="sm" variant={"outline"}>
-        <Link href="/sign-in">Sign in</Link>
-      </Button>
-      <Button asChild size="sm" variant={"default"}>
-        <Link href="/sign-up">Sign up</Link>
-      </Button>
-    </div>
+    <>
+      <div className="flex gap-2">
+        <Button asChild size="sm" variant={"outline"}>
+          <Link href="/sign-in">Sign in</Link>
+        </Button>
+        <Button asChild size="sm" variant={"default"}>
+          <Link href="/sign-up">Sign up</Link>
+        </Button>
+      </div>
+    </>
   );
 }

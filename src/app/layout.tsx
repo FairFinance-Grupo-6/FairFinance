@@ -1,11 +1,12 @@
 import { EnvVarWarning } from "@/components/env-var-warning";
-import HeaderAuth from "@/components/header-auth";
+import AuthButton from "@/components/header-auth";
 import { ThemeSwitcher } from "@/components/theme-switcher";
-import { hasEnvVars } from "@/../utils/supabase/check-env-vars";
+import { hasEnvVars } from "@/utils/supabase/check-env-vars";
 import { GeistSans } from "geist/font/sans";
 import { ThemeProvider } from "next-themes";
 import Link from "next/link";
 import "./globals.css";
+import { Suspense } from "react";
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -17,7 +18,7 @@ export const metadata = {
   description: "The app for managing your finances.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -39,7 +40,9 @@ export default function RootLayout({
                     <Link href={"/"}>Fair Finance</Link>
                   </div>
                   <div className="flex gap-5 items-center">
-                    {!hasEnvVars ? <EnvVarWarning /> : <HeaderAuth />}
+                    <Suspense fallback={<div>Loading...</div>}>
+                      {!hasEnvVars ? <EnvVarWarning /> : <AuthButton />}
+                    </Suspense>
                     <ThemeSwitcher />
                   </div>
                 </div>
