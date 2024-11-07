@@ -10,11 +10,8 @@ export async function signUpAction(formData: FormData): Promise<any> {
   const supabase = createClient();
   const origin = headers().get("origin");
 
-  // for auth.users
   const email = formData.get("email")?.toString();
   const password = formData.get("password")?.toString();
-
-  // for public.profiles
   const firstName = formData.get("firstName")?.toString();
   const lastName = formData.get("lastName")?.toString();
   const dni = formData.get("dni")?.toString();
@@ -23,46 +20,54 @@ export async function signUpAction(formData: FormData): Promise<any> {
   const ruc = formData.get("ruc")?.toString();
   const currency = formData.get("currency")?.toString();
 
+
   if (!email || !password) {
     return { error: "Email and password are required" };
   }
-  const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-    email,
-    password,
-    options: {
-      emailRedirectTo: `${origin}/auth/callback`,
-    },
-  });
 
-  if (signUpError) {
-    return { error: signUpError.message };
+  try {
+    const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: `${origin}/auth/callback`,
+      },
+    });
+
+    if (signUpError) throw new Error(signUpError.message);
+
+    const user_id = signUpData?.user?.id;
+    if (!user_id) {
+      throw new Error("User ID not found after sign up");
+    }
+
+    const { data: profileData, error: profileError } = await supabase.from("profiles").insert([
+      {
+        user_id: user_id,
+        first_name: firstName,
+        last_name: lastName,
+        dni: dni,
+        phone: phone,
+        address: address,
+        ruc: ruc,
+        currency: currency,
+      },
+    ]);
+
+    if (profileError) throw new Error(profileError.message);
+
+    return encodedRedirect(
+      "success",
+      "/sign-up",
+      "Thanks for signing up! Please check your email for a verification link.",
+    );
+
+    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+  } catch (error: any) {
+    return encodedRedirect("error", "/sign-up", error.message);
   }
-
-  const user_id = signUpData?.user?.id;
-  const { data: profileData, error: profileError } = await supabase.from("profiles").insert([
-    {
-      user_id,
-      first_name: firstName,
-      last_name: lastName,
-      dni,
-      phone,
-      address,
-      ruc,
-      currency,
-    },
-  ]);
-
-
-  if (profileError) {
-    return { error: profileError.message };
-  }
-
-  return encodedRedirect(
-    "success",
-    "/sign-up",
-    "Thanks for signing up! Please check your email for a verification link.",
-  );
 };
+
 
 export const signInAction = async (formData: FormData) => {
   const email = formData.get("email") as string;
