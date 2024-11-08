@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { FaMinusCircle } from "react-icons/fa"; // Asegúrate de tener react-icons instalado
+import { createClient } from "@/utils/supabase/client";
 
 const mockUser = {
   email: "usuario@example.com",
@@ -11,6 +12,25 @@ const mockUser = {
 const tiempoTasaOptions = [
   "Anual", "Semestral", "Cuatrimestral", "Trimestral", "Bimestral", "Mensual", "Quincenal", "Diario"
 ];
+
+
+interface Invoice {
+  id: bigint;
+  idFactura: string;
+  typeDocument: string;
+  issueDate: Date;
+  dueDate: Date;
+  initialAmount: number;
+  currency: string;
+  totalOfAdditionalCosts: number;
+  rateType: string;
+  timeOfRate: string;
+  capitalization: string;
+  valueOfTheFee: number;
+  totalFreight: number;
+  idUser: number;
+}
+
 
 // Función para formatear el número solo con comas para los miles
 const formatNumber = (num: number): string => {
@@ -44,6 +64,7 @@ export default function Dashboard() {
     tcea: 0,
   });
 
+  const client = createClient();
 
   const [formattedTotalAmount, setFormattedTotalAmount] = useState("");
   const [formattedTasa, setFormattedTasa] = useState("");
@@ -135,8 +156,42 @@ export default function Dashboard() {
   };
 
 
-  const handleUploadInvoice = () => {
-    console.log("Factura subida");
+  const handleUploadInvoice = async () => {
+    const { data: userData, error: userError } = await client.auth.getUser();
+
+    if (userError) {
+      console.error("error in getting user id", userError);
+      return;
+    }
+
+    const invoiceCall = {
+      id_invoice: invoice.invoiceNumber,
+      type_document: "Factura",
+      issue_date: new Date(invoice.issueDate).toISOString().split('T')[0],
+      due_date: new Date(invoice.dueDate).toISOString().split('T')[0],
+      initial_amount: invoice.totalAmount,
+      currency: invoice.currency,
+      total_of_aditional_costs: invoice.extraCosts.reduce((acc, cost) => acc + cost.amount, 0),
+      rate_type: invoice.tipoTasa,
+      time_of_rate: invoice.tiempoTasa,
+      capitalization: invoice.capitalizacion,
+      value_of_the_fee: invoice.tasa,
+      total_freight: Number.parseFloat(invoice.transportationCosts.toString()),
+      user_id: userData.user?.id,
+    };
+
+    console.log("Factura", invoiceCall);
+
+    const { data: invoiceData, error: invoiceError } = await client.from("documents").upsert([
+      invoiceCall
+    ]).select();
+
+    if (invoiceError) {
+      console.error("error in invoice call", invoiceError);
+      return;
+    }
+    console.log(invoiceData);
+    console.log("Factura subida exitosamente");
   };
 
 
