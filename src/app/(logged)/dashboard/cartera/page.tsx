@@ -1,101 +1,88 @@
-import { ArrowDownIcon, ArrowUpIcon, DollarSign, Wallet } from "lucide-react";
+// src/app/invoices/page.tsx
+"use client";
 
-interface Transaction {
-  id: string;
-  payee: string;
-  amount: number;
-  date: string;
-  category: string;
-}
+import { Button } from "@/components/ui/button";
+import { Clock } from "lucide-react";
+import { useEffect, useState } from "react";
+import { createClient } from "../../../../utils/supabase/client";
+import { useTheme } from "next-themes";
 
-const data = [
-  { name: "Jan", income: 2400, expenses: 1398 },
-  { name: "Feb", income: 1398, expenses: 2800 },
-  { name: "Mar", income: 9800, expenses: 2908 },
-  { name: "Apr", income: 3908, expenses: 4800 },
-  { name: "May", income: 4800, expenses: 3800 },
-  { name: "Jun", income: 3800, expenses: 4300 },
-];
+const mockUser = {
+  email: "usuario@example.com",
+  name: "Usuario Ejemplo",
+};
 
-const transactions: Transaction[] = [
-  { id: "1", payee: "Apple", amount: -999, date: "2023-06-01", category: "Electronics" },
-  { id: "2", payee: "Salary", amount: 5000, date: "2023-06-02", category: "Income" },
-  { id: "3", payee: "Grocery Store", amount: -150, date: "2023-06-03", category: "Food" },
-  { id: "4", payee: "Gas Station", amount: -50, date: "2023-06-04", category: "Transportation" },
-  { id: "5", payee: "Restaurant", amount: -80, date: "2023-06-05", category: "Dining" },
-];
+export default function InvoicesPage() {
+  const { theme, setTheme, systemTheme } = useTheme();
+  const [user, setUser] = useState<typeof mockUser | null>(null);
 
-export default function Page() {
+  useEffect(() => {
+    const checkUser = () => {
+      createClient().auth.getUser().then(({ data }) => {
+        mockUser.email = data.user?.email || "";
+        mockUser.name = data.user?.email?.split("@")[0] || "";
+        setUser(mockUser);
+      });
+    };
+    checkUser();
+  }, []);
+
+  // Usa el tema del sistema si el tema actual es "system"
+  const currentTheme = theme === "system" ? systemTheme : theme;
+
+  if (!user) {
+    return <div>Loading...</div>;
+  }
+
   return (
-    <div className="p-8">
-      <h1 className="text-3xl font-bold mb-6">Finance Dashboard</h1>
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {/* Total Balance Card */}
-        <div className="bg-white p-6 shadow-md rounded-md">
-          <div className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <div className="text-sm font-medium">Total Balance</div>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </div>
-          <div className="text-2xl font-bold">$12,345</div>
-          <p className="text-xs text-muted-foreground">+2% from last month</p>
-        </div>
+    <main
+      className={`w-full max-w-3xl mx-auto p-4 space-y-6 ${
+        currentTheme === "dark" ? "bg-gray-900 text-white" : "bg-white text-black"
+      }`}
+    >
+      <div className="space-y-2">
+        <h1 className="text-2xl font-semibold">
+          <span>Hola {user.name}</span>
+          <span className="text-gray-500 font-normal"> estas son tus facturas registradas</span>
+        </h1>
 
-        {/* Income Card */}
-        <div className="bg-white p-6 shadow-md rounded-md">
-          <div className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <div className="text-sm font-medium">Income</div>
-            <ArrowUpIcon className="h-4 w-4 text-muted-foreground" />
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl">Overview</h2>
+          <div className="flex items-center justify-between bg-black p-3 pl-4 pr-20 text-white rounded">
+            <Clock className="mr-2 h-4 w-4" />
+            <p className="pl-2 w-36">Ver Todas</p>
           </div>
-          <div className="text-2xl font-bold">$5,000</div>
-          <p className="text-xs text-muted-foreground">+10% from last month</p>
-        </div>
-
-        {/* Expenses Card */}
-        <div className="bg-white p-6 shadow-md rounded-md">
-          <div className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <div className="text-sm font-medium">Expenses</div>
-            <ArrowDownIcon className="h-4 w-4 text-muted-foreground" />
-          </div>
-          <div className="text-2xl font-bold">$3,500</div>
-          <p className="text-xs text-muted-foreground">+5% from last month</p>
-        </div>
-
-        {/* Savings Card */}
-        <div className="bg-white p-6 shadow-md rounded-md">
-          <div className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <div className="text-sm font-medium">Savings</div>
-            <Wallet className="h-4 w-4 text-muted-foreground" />
-          </div>
-          <div className="text-2xl font-bold">$1,500</div>
-          <p className="text-xs text-muted-foreground">+20% from last month</p>
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7 mt-4">
-        {/* Recent Transactions Table */}
-        <div className="col-span-3 bg-white p-6 shadow-md rounded-md">
-          <div className="text-lg font-medium mb-4">Recent Transactions</div>
-          <p className="text-xs text-muted-foreground">You made 5 transactions this month.</p>
-          <table className="min-w-full mt-4">
-            <thead>
-              <tr>
-                <th className="py-2 px-4 text-left">Payee</th>
-                <th className="py-2 px-4 text-left">Amount</th>
-              </tr>
-            </thead>
-            <tbody>
-              {transactions.map((transaction) => (
-                <tr key={transaction.id}>
-                  <td className="py-2 px-4">{transaction.payee}</td>
-                  <td className={`py-2 px-4 ${transaction.amount > 0 ? "text-green-600" : "text-red-600"}`}>
-                    ${Math.abs(transaction.amount).toFixed(2)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="border-2 p-6 space-y-4">
+          <div className="w-8 h-8 bg-black rounded-full" />
+          <div>
+            <div className="text-sm text-gray-500">Emisión 7/1/2024</div>
+            <div className="text-2xl font-semibold">S/ 5,000.00</div>
+            <div className="text-sm text-gray-500">Soles</div>
+          </div>
+        </div>
+
+        <div className="border-2 p-6 space-y-4">
+          <div className="w-8 h-8 bg-black rounded-full" />
+          <div>
+            <div className="text-sm text-gray-500">Emisión 7/15/2024</div>
+            <div className="text-2xl font-semibold">$ 8,000.00</div>
+            <div className="text-sm text-gray-500">Dólares</div>
+          </div>
         </div>
       </div>
-    </div>
+
+      <div className="space-y-2">
+        <Button className="w-full bg-black text-white hover:bg-gray-800">
+          Calcular TCEA
+        </Button>
+        <Button variant="outline" className="w-full border-2 hover:bg-gray-100">
+          Cancel
+        </Button>
+      </div>
+    </main>
   );
 }
