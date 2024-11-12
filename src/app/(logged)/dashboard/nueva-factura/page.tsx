@@ -1,13 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { FaMinusCircle } from "react-icons/fa"; // Asegúrate de tener react-icons instalado
+import { FaMinusCircle } from "react-icons/fa"; 
 import { createClient } from "@/utils/supabase/client";
 
 const mockUser = {
   email: "usuario@example.com",
   name: "Usuario Ejemplo",
 };
+
+const client = createClient();
 
 const tiempoTasaOptions = [
   "Anual", "Semestral", "Cuatrimestral", "Trimestral", "Bimestral", "Mensual", "Quincenal", "Diario"
@@ -54,8 +56,7 @@ export default function NuevaFactura() {
     tcea: 0,
   });
 
-
-  const client = createClient();
+  
 
   const [formattedTotalAmount, setFormattedTotalAmount] = useState("");
   const [formattedTasa, setFormattedTasa] = useState("");
