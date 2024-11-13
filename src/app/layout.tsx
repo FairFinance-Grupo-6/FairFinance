@@ -40,6 +40,8 @@ export default async function RootLayout({
                   <div className="flex gap-5 items-center font-semibold">
                     <Link href={"/"}>Fair Finance</Link>
                     <Link href={"/dashboard"}>Dashboard</Link>
+                    <Link href={"/dashboard/facturas"}>Facturas</Link>
+                    <Link href={"/dashboard/cartera"}>Carteras</Link>
                     <Link href={"/dashboard/nueva-factura"}>Nueva factura</Link>
                   </div>
                   <div className="flex gap-5 items-center">
