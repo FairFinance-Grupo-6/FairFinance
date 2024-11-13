@@ -61,9 +61,10 @@ export default function AllInvoicesPage() {
           placeholder="Actualidad"
           value={selectedDate}
           onChange={handleDateChange}
-          className="border border-black p-2 rounded-md text-gray-800"
+          className="border border-black p-2 rounded-md text-gray-800 ml-auto"
         />
       </div>
+
 
       <div className="overflow-x-auto border border-black rounded-md">
         <table className="min-w-full text-sm text-center">
@@ -96,20 +97,34 @@ export default function AllInvoicesPage() {
           </tbody>
         </table>
       </div>
+      <div className="flex items-center justify-between mt-4 space-x-4">
+  <div className="flex items-center">
+    <button className="border border-black px-4 py-2 rounded-md text-gray-800 bg-white hover:bg-gray-100">
+      Exportar CSV
+    </button>
+  </div>
 
-      <div className="flex items-center justify-center mt-4 space-x-4">
-        {Array.from({ length: Math.ceil(filteredInvoices.length / invoicesPerPage) }, (_, i) => (
-          <button
-            key={i}
-            onClick={() => paginate(i + 1)}
-            className={`border border-black px-4 py-2 rounded-md ${
-              currentPage === i + 1 ? "bg-black text-white" : "bg-white text-black"
-            }`}
-          >
-            {i + 1}
-          </button>
-        ))}
-      </div>
+  <div className="flex items-center space-x-4">
+    <button
+      onClick={() => paginate(currentPage - 1)}
+      className={`border border-black px-4 py-2 rounded-full ${currentPage === 1 ? "bg-gray-200" : "bg-white"} text-gray-800`}
+      disabled={currentPage === 1}
+    >
+      &lt;
+    </button>
+    
+    {/* Flecha derecha */}
+    <button
+      onClick={() => paginate(currentPage + 1)}
+      className={`border border-black px-4 py-2 rounded-full ${currentPage === Math.ceil(filteredInvoices.length / invoicesPerPage) ? "bg-gray-200" : "bg-white"} text-gray-800`}
+      disabled={currentPage === Math.ceil(filteredInvoices.length / invoicesPerPage)}
+    >
+      &gt;
+    </button>
+  </div>
+</div>
+
+
     </main>
   );
 }
