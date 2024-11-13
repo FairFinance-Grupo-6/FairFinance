@@ -12,7 +12,7 @@ const mockUser = {
   name: "Usuario Ejemplo",
 };
 
-export default function BriefcasesPage() {
+export default function AllInvoicesPage() {
   const { theme, setTheme, systemTheme } = useTheme();
   const [user, setUser] = useState<typeof mockUser | null>(null);
 
@@ -42,11 +42,9 @@ export default function BriefcasesPage() {
     >
       <div className="space-y-2">
         <h1 className="text-2xl font-semibold">
-          <span>Hola {user.name}</span>
-          <span className="text-gray-500 font-normal"> estas son tus CARTERAS</span>
+          <span>Hola LOL</span>
         </h1>
       </div>
-      
     </main>
   );
 }
