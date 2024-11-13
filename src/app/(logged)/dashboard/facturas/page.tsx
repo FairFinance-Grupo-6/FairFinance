@@ -66,7 +66,7 @@ export default function AllInvoicesPage() {
       </div>
 
 
-      <div className="overflow-x-auto border border-black rounded-md">
+      <div className="overflow-x-auto">
         <table className="min-w-full text-sm text-center">
           <thead>
             <tr className="bg-black text-white">
