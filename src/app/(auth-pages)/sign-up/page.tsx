@@ -148,7 +148,6 @@ export default function Signup({ searchParams }: { searchParams: Message }) {
               <option value="">Selecciona una moneda</option>
               <option value="PEN">PEN - Soles</option>
               <option value="USD">USD - Dólares</option>
-              <option value="EUR">EUR - Euros</option>
             </select>
           </div>
         </div>
