@@ -1,7 +1,9 @@
-"use client";
+"use client"
 
 import { SetStateAction, useEffect, useState } from "react";
 import mockInvoices from "@/app/data/invoices.json"; 
+import { jsPDF } from "jspdf";
+import autoTable from "jspdf-autotable";
 
 const mockUser = {
   email: "usuario@example.com",
@@ -45,6 +47,36 @@ export default function AllInvoicesPage() {
 
   const paginate = (pageNumber: SetStateAction<number>) => setCurrentPage(pageNumber);
 
+  // Calcular la TCEA promedio de las facturas actuales
+  const calculateAverageTCEA = () => {
+    const totalTCEA = currentInvoices.reduce((sum, invoice) => sum + invoice.TCEA, 0);
+    return (totalTCEA / currentInvoices.length).toFixed(2);
+  };
+
+  const averageTCEA = calculateAverageTCEA();
+
+  // Función para exportar a PDF
+  const exportToPDF = () => {
+    const doc = new jsPDF();
+    doc.text("Facturas - Reporte", 20, 20);
+    autoTable(doc, {
+      head: [
+        ["Nombre", "Fecha Emisión", "Fecha Vencimiento", "Importe", "Moneda", "TCEA", "Responsable"]
+      ],
+      body: filteredInvoices.map(invoice => [
+        invoice.nombre,
+        invoice.fecha_emision,
+        invoice.fecha_vencimiento,
+        invoice.importe.toFixed(2),
+        invoice.moneda,
+        invoice.TCEA,
+        invoice.responsable
+      ])
+    });
+    doc.text(`TCEA Promedio: ${averageTCEA}%`, 20, (doc as any).autoTable.previous.finalY + 10);  // Agregar TCEA promedio al final
+    doc.save("facturas.pdf");
+  };
+
   if (!user) {
     return <div>Loading usuario...</div>;
   }
@@ -52,7 +84,7 @@ export default function AllInvoicesPage() {
   return (
     <main className="w-full max-w-3xl mx-auto p-4 space-y-6 bg-white text-black">
       <div className="space-y-2">
-        <h1 className="text-3xl font-semibold text-center text-gray-800">Todas tus Facturas</h1>
+        <h1 className="text-3xl font-semibold text-center text-gray-800">Todas las Facturas</h1>
       </div>
 
       <div className="flex items-center justify-between mb-4 space-x-2">
@@ -64,7 +96,6 @@ export default function AllInvoicesPage() {
           className="border border-black p-2 rounded-md text-gray-800 ml-auto"
         />
       </div>
-
 
       <div className="overflow-x-auto">
         <table className="min-w-full text-sm text-center">
@@ -97,34 +128,32 @@ export default function AllInvoicesPage() {
           </tbody>
         </table>
       </div>
+
       <div className="flex items-center justify-between mt-4 space-x-4">
-  <div className="flex items-center">
-    <button className="border border-black px-4 py-2 rounded-md text-gray-800 bg-white hover:bg-gray-100">
-      Exportar CSV
-    </button>
-  </div>
+        <div className="flex items-center">
+          <button onClick={exportToPDF} className="border border-black px-4 py-2 rounded-md text-gray-800 bg-white hover:bg-gray-100">
+            Exportar PDF
+          </button>
+        </div>
 
-  <div className="flex items-center space-x-4">
-    <button
-      onClick={() => paginate(currentPage - 1)}
-      className={`border border-black px-4 py-2 rounded-full ${currentPage === 1 ? "bg-gray-200" : "bg-white"} text-gray-800`}
-      disabled={currentPage === 1}
-    >
-      &lt;
-    </button>
-    
-    {/* Flecha derecha */}
-    <button
-      onClick={() => paginate(currentPage + 1)}
-      className={`border border-black px-4 py-2 rounded-full ${currentPage === Math.ceil(filteredInvoices.length / invoicesPerPage) ? "bg-gray-200" : "bg-white"} text-gray-800`}
-      disabled={currentPage === Math.ceil(filteredInvoices.length / invoicesPerPage)}
-    >
-      &gt;
-    </button>
-  </div>
-</div>
-
-
+        <div className="flex items-center space-x-4">
+          <button
+            onClick={() => paginate(currentPage - 1)}
+            className={`border border-black px-4 py-2 rounded-full ${currentPage === 1 ? "bg-gray-200" : "bg-white"} text-gray-800`}
+            disabled={currentPage === 1}
+          >
+            &lt;
+          </button>
+          
+          <button
+            onClick={() => paginate(currentPage + 1)}
+            className={`border border-black px-4 py-2 rounded-full ${currentPage === Math.ceil(filteredInvoices.length / invoicesPerPage) ? "bg-gray-200" : "bg-white"} text-gray-800`}
+            disabled={currentPage === Math.ceil(filteredInvoices.length / invoicesPerPage)}
+          >
+            &gt;
+          </button>
+        </div>
+      </div>
     </main>
   );
 }
