@@ -1,7 +1,7 @@
 "use client"
 
 import { SetStateAction, useEffect, useState } from "react";
-import mockInvoices from "@/app/data/invoices.json"; 
+import mockInvoices from "@/app/data/invoices.json";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 
@@ -57,11 +57,21 @@ export default function AllInvoicesPage() {
 
   // Función para exportar a PDF
   const exportToPDF = () => {
-    const doc = new jsPDF();
+    const doc = new jsPDF("landscape");
+
+    const date = new Date();
+    const formattedDate = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
+
     doc.text("Facturas - Reporte", 20, 20);
+    doc.text(`Fecha: ${formattedDate}`, 20, 30);
     autoTable(doc, {
       head: [
-        ["Nombre", "Fecha Emisión", "Fecha Vencimiento", "Importe", "Moneda", "TCEA", "Responsable"]
+        [
+          "Nombre", "Fecha Emisión", "Fecha Vencimiento", "Importe", "Moneda", 
+          "Costos Adicionales", "Tipo Tasa", "Tiempo Tasa", "Capitalización", 
+          "Valor Tasa", "Portes", "Descuento", "TCEA", "Responsable", 
+          "Mora", "Días Mora", "Comisión Tardía", "Protesto"
+        ]
       ],
       body: filteredInvoices.map(invoice => [
         invoice.nombre,
@@ -69,9 +79,28 @@ export default function AllInvoicesPage() {
         invoice.fecha_vencimiento,
         invoice.importe.toFixed(2),
         invoice.moneda,
-        invoice.TCEA,
-        invoice.responsable
-      ])
+        invoice.costos_adicionales.map((cost: { descripcion: string; monto: number }) => `${cost.descripcion}: ${cost.monto.toFixed(2)}`).join(", "),
+        invoice.tipo_tasa,
+        invoice.tiempo_tasa,
+        invoice.capitalizacion,
+        invoice.valor_tasa.toFixed(2),
+        invoice.portes.toFixed(2),
+        invoice.descuento.toFixed(2),
+        invoice.TCEA.toFixed(2),
+        invoice.responsable,
+        invoice.mora ? "Sí" : "No",
+        invoice.dias_demora ? invoice.dias_demora : "-",
+        invoice.comision_tardia ? invoice.comision_tardia.toFixed(2) : "-",
+        invoice.protesto ? "Sí" : "No"
+      ]),
+      startY: 35,
+      theme: "grid", // Usar el estilo de rejilla para la tabla
+      styles: {
+        cellWidth: 'auto', // Ajustar el ancho de las celdas automáticamente
+        fontSize: 6, // Ajustar el tamaño de la fuente a 6 (más pequeño)
+        overflow: "linebreak" // Para manejar el desbordamiento de texto
+      },
+      margin: { top: 20, left: 20, right: 20 }
     });
     doc.text(`TCEA Promedio: ${averageTCEA}%`, 20, (doc as any).autoTable.previous.finalY + 10);  // Agregar TCEA promedio al final
     doc.save("facturas.pdf");
@@ -82,7 +111,7 @@ export default function AllInvoicesPage() {
   }
 
   return (
-    <main className="w-full max-w-3xl mx-auto p-4 space-y-6 bg-white text-black">
+    <main className="w-full max-w-none mx-auto p-4 space-y-6 bg-white text-black">
       <div className="space-y-2">
         <h1 className="text-3xl font-semibold text-center text-gray-800">Todas las Facturas</h1>
       </div>
@@ -106,8 +135,19 @@ export default function AllInvoicesPage() {
               <th className="p-4 font-medium border-b border-gray-500">Fecha Vencimiento</th>
               <th className="p-4 font-medium border-b border-gray-500">Importe</th>
               <th className="p-4 font-medium border-b border-gray-500">Moneda</th>
+              <th className="p-4 font-medium border-b border-gray-500">Costos Adicionales</th>
+              <th className="p-4 font-medium border-b border-gray-500">Tipo Tasa</th>
+              <th className="p-4 font-medium border-b border-gray-500">Tiempo Tasa</th>
+              <th className="p-4 font-medium border-b border-gray-500">Capitalización</th>
+              <th className="p-4 font-medium border-b border-gray-500">Valor Tasa</th>
+              <th className="p-4 font-medium border-b border-gray-500">Portes</th>
+              <th className="p-4 font-medium border-b border-gray-500">Descuento</th>
               <th className="p-4 font-medium border-b border-gray-500">TCEA</th>
               <th className="p-4 font-medium border-b border-gray-500">Responsable</th>
+              <th className="p-4 font-medium border-b border-gray-500">Mora</th>
+              <th className="p-4 font-medium border-b border-gray-500">Días Mora</th>
+              <th className="p-4 font-medium border-b border-gray-500">Comisión Tardía</th>
+              <th className="p-4 font-medium border-b border-gray-500">Protesto</th>
             </tr>
           </thead>
           <tbody>
@@ -121,8 +161,21 @@ export default function AllInvoicesPage() {
                 <td className="p-4">{invoice.fecha_vencimiento}</td>
                 <td className="p-4">{invoice.importe.toFixed(2)}</td>
                 <td className="p-4">{invoice.moneda}</td>
-                <td className="p-4">{invoice.TCEA}%</td>
+                <td className="p-4">
+                  {invoice.costos_adicionales.map((cost: { descripcion: string; monto: number }) => `${cost.descripcion}: ${cost.monto.toFixed(2)}`).join(", ")}
+                </td>
+                <td className="p-4">{invoice.tipo_tasa}</td>
+                <td className="p-4">{invoice.tiempo_tasa}</td>
+                <td className="p-4">{invoice.capitalizacion}</td>
+                <td className="p-4">{invoice.valor_tasa.toFixed(2)}</td>
+                <td className="p-4">{invoice.portes.toFixed(2)}</td>
+                <td className="p-4">{invoice.descuento.toFixed(2)}</td>
+                <td className="p-4">{invoice.TCEA.toFixed(2)}</td>
                 <td className="p-4">{invoice.responsable}</td>
+                <td className="p-4">{invoice.mora ? "Sí" : "No"}</td>
+                <td className="p-4">{invoice.dias_demora ? invoice.dias_demora : "-"}</td>
+                <td className="p-4">{invoice.comision_tardia ? invoice.comision_tardia.toFixed(2) : "-"}</td>
+                <td className="p-4">{invoice.protesto ? "Sí" : "No"}</td>
               </tr>
             ))}
           </tbody>
