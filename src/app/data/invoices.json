@@ -1,0 +1,270 @@
+[
+  {
+    "nombre": "Factura 001",
+    "fecha_emision": "2024-01-10",
+    "fecha_vencimiento": "2024-02-10",
+    "importe": 1200.00,
+    "moneda": "USD",
+    "costos_adicionales": [
+      {
+        "descripcion": "Envío",
+        "monto": 50.00
+      },
+      {
+        "descripcion": "Gestión administrativa",
+        "monto": 30.00
+      }
+    ],
+    "tipo_tasa": "Efectiva",
+    "tiempo_tasa": "Anual",
+    "capitalizacion": "Anual",
+    "valor_tasa": 5.00,
+    "portes": 20.00,
+    "descuento": 10.00,
+    "TCEA": 5.5,
+    "responsable": "Juan Perez",
+    "mora": false
+  },
+  {
+    "nombre": "Factura 002",
+    "fecha_emision": "2024-03-15",
+    "fecha_vencimiento": "2024-04-15",
+    "importe": 2500.00,
+    "moneda": "PEN",
+    "costos_adicionales": [
+      {
+        "descripcion": "Comisión de servicio",
+        "monto": 100.00
+      }
+    ],
+    "tipo_tasa": "Nominal",
+    "tiempo_tasa": "Mensual",
+    "capitalizacion": "Mensual",
+    "valor_tasa": 4.50,
+    "portes": 35.00,
+    "descuento": 15.00,
+    "TCEA": 6.1,
+    "responsable": "Maria Rodriguez",
+    "mora": true,
+    "dias_demora": 10,
+    "comision_tardia": 50.00,
+    "protesto": true
+  },
+  {
+    "nombre": "Factura 003",
+    "fecha_emision": "2024-05-20",
+    "fecha_vencimiento": "2024-06-20",
+    "importe": 3300.00,
+    "moneda": "USD",
+    "costos_adicionales": [
+      {
+        "descripcion": "Tarifa de mantenimiento",
+        "monto": 75.00
+      },
+      {
+        "descripcion": "Honorarios legales",
+        "monto": 25.00
+      },
+      {
+        "descripcion": "Revisión adicional",
+        "monto": 10.00
+      }
+    ],
+    "tipo_tasa": "Efectiva",
+    "tiempo_tasa": "Semestral",
+    "capitalizacion": "Trimestral",
+    "valor_tasa": 3.75,
+    "portes": 25.00,
+    "descuento": 20.00,
+    "TCEA": 4.8,
+    "responsable": "Carlos Gutierrez",
+    "mora": false
+  },
+  {
+    "nombre": "Factura 004",
+    "fecha_emision": "2024-01-10",
+    "fecha_vencimiento": "2024-02-10",
+    "importe": 5000.75,
+    "moneda": "USD",
+    "costos_adicionales": [
+      {
+        "descripcion": "Gastos operativos",
+        "monto": 150.00
+      },
+      {
+        "descripcion": "Seguro adicional",
+        "monto": 10.00
+      }
+    ],
+    "tipo_tasa": "Efectiva",
+    "tiempo_tasa": "Anual",
+    "capitalizacion": "Semestral",
+    "valor_tasa": 5.5,
+    "portes": 50.00,
+    "descuento": 75.00,
+    "TCEA": 6.75,
+    "responsable": "Carlos Pérez",
+    "mora": true,
+    "dias_demora": 20,
+    "comision_tardia": 100.00,
+    "protesto": false
+  },
+  {
+    "nombre": "Factura 005",
+    "fecha_emision": "2024-02-15",
+    "fecha_vencimiento": "2024-03-15",
+    "importe": 1200.00,
+    "moneda": "PEN",
+    "costos_adicionales": [
+      {
+        "descripcion": "Instalación",
+        "monto": 80.00
+      },
+      {
+        "descripcion": "Almacenaje",
+        "monto": 5.00
+      },
+      {
+        "descripcion": "Servicios extra",
+        "monto": 3.00
+      }
+    ],
+    "tipo_tasa": "Nominal",
+    "tiempo_tasa": "Semestral",
+    "capitalizacion": "Cuatrimestral",
+    "valor_tasa": 7.0,
+    "portes": 25.00,
+    "descuento": 40.00,
+    "TCEA": 7.8,
+    "responsable": "Ana Martínez",
+    "mora": false
+  },
+  {
+    "nombre": "Factura 006",
+    "fecha_emision": "2024-03-01",
+    "fecha_vencimiento": "2024-04-01",
+    "importe": 3500.50,
+    "moneda": "USD",
+    "costos_adicionales": [
+      {
+        "descripcion": "Tarifa de urgencia",
+        "monto": 100.00
+      }
+    ],
+    "tipo_tasa": "Efectiva",
+    "tiempo_tasa": "Trimestral",
+    "capitalizacion": "Mensual",
+    "valor_tasa": 4.8,
+    "portes": 60.00,
+    "descuento": 30.00,
+    "TCEA": 5.6,
+    "responsable": "Luis González",
+    "mora": false
+  },
+  {
+    "nombre": "Factura 007",
+    "fecha_emision": "2024-03-20",
+    "fecha_vencimiento": "2024-05-20",
+    "importe": 7500.00,
+    "moneda": "PEN",
+    "costos_adicionales": [
+      {
+        "descripcion": "Comisión de procesamiento",
+        "monto": 120.00
+      },
+      {
+        "descripcion": "Costo por entrega rápida",
+        "monto": 25.00
+      }
+    ],
+    "tipo_tasa": "Nominal",
+    "tiempo_tasa": "Mensual",
+    "capitalizacion": "Quincenal",
+    "valor_tasa": 8.2,
+    "portes": 40.00,
+    "descuento": 65.00,
+    "TCEA": 9.3,
+    "responsable": "Gabriela Flores",
+    "mora": true,
+    "dias_demora": 5,
+    "comision_tardia": 25.00,
+    "protesto": false
+  },
+  {
+    "nombre": "Factura 008",
+    "fecha_emision": "2024-04-05",
+    "fecha_vencimiento": "2024-06-05",
+    "importe": 900.00,
+    "moneda": "USD",
+    "costos_adicionales": [
+      {
+        "descripcion": "Tasas administrativas",
+        "monto": 45.00
+      },
+      {
+        "descripcion": "Gastos adicionales",
+        "monto": 12.00
+      }
+    ],
+    "tipo_tasa": "Efectiva",
+    "tiempo_tasa": "Quincenal",
+    "capitalizacion": "Diario",
+    "valor_tasa": 6.0,
+    "portes": 20.00,
+    "descuento": 15.00,
+    "TCEA": 6.7,
+    "responsable": "María López",
+    "mora": false
+  },
+  {
+    "nombre": "Factura 009",
+    "fecha_emision": "2024-04-15",
+    "fecha_vencimiento": "2024-05-15",
+    "importe": 2800.50,
+    "moneda": "PEN",
+    "costos_adicionales": [
+      {
+        "descripcion": "Reajuste por inflación",
+        "monto": 90.00
+      }
+    ],
+    "tipo_tasa": "Nominal",
+    "tiempo_tasa": "Bimestral",
+    "capitalizacion": "Anual",
+    "valor_tasa": 9.0,
+    "portes": 55.00,
+    "descuento": 35.00,
+    "TCEA": 10.2,
+    "responsable": "Diego Fernández",
+    "mora": true,
+    "dias_demora": 15,
+    "comision_tardia": 75.00,
+    "protesto": true
+  },
+  {
+    "nombre": "Factura 010",
+    "fecha_emision": "2024-05-01",
+    "fecha_vencimiento": "2024-06-01",
+    "importe": 6500.25,
+    "moneda": "USD",
+    "costos_adicionales": [
+      {
+        "descripcion": "Seguro de cobertura extendida",
+        "monto": 120.00
+      },
+      {
+        "descripcion": "Gastos de instalación",
+        "monto": 20.00
+      }
+    ],
+    "tipo_tasa": "Efectiva",
+    "tiempo_tasa": "Anual",
+    "capitalizacion": "Mensual",
+    "valor_tasa": 7.5,
+    "portes": 75.00,
+    "descuento": 200.00,
+    "TCEA": 8.9,
+    "responsable": "Nathalie Cruz",
+    "mora": false
+  }
+]
