@@ -8,13 +8,13 @@ export default async function profilePage() {
 	if (!user) {
 		return null;
 	}
-	console.log(user);
+	//console.log(user);
 	const { data: profile, error: profileError } = await createClient()
 		.from("profiles")
 		.select()
 		.eq("user_id", user.id)
 		.single();
-	console.log(profile);
+	//console.log(profile);
 	if (profileError) {
 		console.error(profileError);
 		return null;
