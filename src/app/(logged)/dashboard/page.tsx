@@ -4,32 +4,26 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Clock } from "lucide-react";
 import { useTheme } from "next-themes";
-import Link from 'next/link';
-import { createClient } from "../../../utils/supabase/client";
-
-// Define un usuario constante
+import Link from "next/link";
+import { supabase } from "@/utils/supabase/client";
 
 const mockUser = {
   email: "usuario@example.com",
   name: "Usuario Ejemplo",
 };
 
-
-
 export default function Dashboard() {
   const { theme, setTheme, systemTheme } = useTheme();
-  const [user, setUser] = useState<typeof mockUser | null>(null); // Cambia el tipo aquí
+  const [user, setUser] = useState<typeof mockUser | null>(null);
 
   useEffect(() => {
-    // Simula la autenticación y establece el usuario
     const checkUser = () => {
-      createClient().auth.getUser().then(({ data }) => {
+      supabase.auth.getUser().then(({ data }) => {
         mockUser.email = data.user?.email || "";
         mockUser.name = data.user?.email?.split("@")[0] || "";
 
         setUser(mockUser);
       });
-      // Aquí simplemente asignamos el usuario constante
     };
     checkUser();
   }, []);
@@ -37,20 +31,26 @@ export default function Dashboard() {
   const currentTheme = theme === "system" ? systemTheme : theme;
 
   if (!user) {
-    return <div>Loading...</div>; // Mientras se establece el usuario
+    return <div>Loading...</div>;
   }
 
   return (
-    
     <main
       className={`w-full max-w-3xl mx-auto p-4 space-y-6 ${
-        currentTheme === "dark" ? "bg-gray-900 text-white" : "bg-white text-black"
+        currentTheme === "dark"
+          ? "bg-gray-900 text-white"
+          : "bg-white text-black"
       }`}
     >
       <div className="p-4">
-      <h1 className="text-2xl font-semibold">Bienvenido a tu Dashboard, {user.name}</h1>
-      <p>Email: {user.email}</p>
-      <span className="text-gray-500 font-normal"> Estas son tus facturas registradas</span>
+        <h1 className="text-2xl font-semibold">
+          Bienvenido a tu Dashboard, {user.name}
+        </h1>
+        <p>Email: {user.email}</p>
+        <span className="text-gray-500 font-normal">
+          {" "}
+          Estas son tus facturas registradas
+        </span>
       </div>
       <div className="space-y-2">
         <div className="flex items-center justify-between">
@@ -86,20 +86,12 @@ export default function Dashboard() {
 
       <div className="space-y-2">
         <Button className="w-full bg-black text-white hover:bg-gray-800">
-          <Link href="/dashboard/nueva-factura">
-            Agregar Factura
-          </Link>
+          <Link href="/dashboard/nueva-factura">Agregar Factura</Link>
         </Button>
         <Button variant="outline" className="w-full border-2 hover:bg-gray-100">
-           <Link href="/dashboard/cartera">
-             Calcular TCEA de Carteras        
-           </Link>
+          <Link href="/dashboard/cartera">Calcular TCEA de Carteras</Link>
         </Button>
       </div>
     </main>
   );
 }
-
-
-
-

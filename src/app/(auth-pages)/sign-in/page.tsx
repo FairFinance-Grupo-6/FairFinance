@@ -9,9 +9,7 @@ export default function Login({ searchParams }: { searchParams: Message }) {
   return (
     <form className="flex-1 flex flex-col min-w-64">
       <h1 className="text-2xl font-medium">Bienvenido@</h1>
-      <p className="text-sm text-foreground">
-        Nos alegra verte de nuevo.
-      </p>
+      <p className="text-sm text-foreground">Nos alegra verte de nuevo.</p>
       <p className="text-sm text-foreground">
         ¿No tienes una cuentas?{" "}
         <Link className="text-foreground font-medium underline" href="/sign-up">
@@ -36,7 +34,10 @@ export default function Login({ searchParams }: { searchParams: Message }) {
           placeholder="Your password"
           required
         />
-        <SubmitButton pendingText="Iniciando sesión..." formAction={signInAction}>
+        <SubmitButton
+          pendingText="Iniciando sesión..."
+          formAction={signInAction}
+        >
           Inicia sesión
         </SubmitButton>
         <FormMessage message={searchParams} />

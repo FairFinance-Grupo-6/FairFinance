@@ -1,194 +1,159 @@
-"use client"
+"use client";
 
-import { SetStateAction, useEffect, useState } from "react";
+import { useState, useEffect } from "react";
+import { FacturaTable } from "@/components/factura/FacturaTable";
+import Link from "next/link";
 import mockInvoices from "@/app/data/invoices.json";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 
-const mockUser = {
-  email: "usuario@example.com",
-  name: "Usuario Ejemplo",
-};
+interface CostoAdicional {
+  id: number;
+  descripcion: string;
+  monto: string;
+  esPorcentaje: boolean;
+  pagadoAlInicio: boolean;
+}
 
-export default function AllInvoicesPage() {
-  const [user, setUser] = useState<typeof mockUser | null>(null);
-  const [invoices, setInvoices] = useState<any[]>(mockInvoices);
-  const [filteredInvoices, setFilteredInvoices] = useState<any[]>(mockInvoices);
+interface Factura {
+  id: number;
+  fechaEmision: string;
+  fechaVencimiento: string;
+  plazoDescuento: string;
+  importeNominal: string;
+  moneda: string;
+  tipoTasa: string;
+  tiempoTasa: string;
+  capitalizacion: string;
+  valorTasa: string;
+  costosAdicionales: CostoAdicional[];
+  portes: string;
+}
+
+interface FacturaTableProps {
+  facturas: Factura[];
+}
+
+export default function FacturasPage() {
+  const [facturas, setFacturas] = useState<Factura[]>([]);
   const [selectedDate, setSelectedDate] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const invoicesPerPage = 7;
+  const invoicesPerPage = 4;
 
   useEffect(() => {
-    const checkUser = () => {
-      setUser(mockUser);
-    };
-    checkUser();
+    setFacturas(mockInvoices);
   }, []);
 
-  useEffect(() => {
+  const filteredFacturas = facturas.filter((factura) => {
     if (selectedDate) {
-      const filtered = invoices.filter((invoice) =>
-        new Date(invoice.fecha_vencimiento) <= new Date(selectedDate)
-      );
-      setFilteredInvoices(filtered);
-    } else {
-      setFilteredInvoices(invoices);
+      return factura.fechaEmision == selectedDate;
     }
-  }, [selectedDate, invoices]);
+    return true;
+  });
 
   const indexOfLastInvoice = currentPage * invoicesPerPage;
   const indexOfFirstInvoice = indexOfLastInvoice - invoicesPerPage;
-  const currentInvoices = filteredInvoices.slice(indexOfFirstInvoice, indexOfLastInvoice);
+  const currentInvoices = filteredFacturas.slice(
+    indexOfFirstInvoice,
+    indexOfLastInvoice,
+  );
 
-  const handleDateChange = (e: { target: { value: SetStateAction<string>; }; }) => {
-    setSelectedDate(e.target.value);
-    setCurrentPage(1); // Reset to first page when date changes
+  const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
+
+  const safeToFixed = (value: any, decimals: number = 2) => {
+    return typeof value === "number" && !isNaN(value)
+      ? value.toFixed(decimals)
+      : "0.00";
   };
 
-  const paginate = (pageNumber: SetStateAction<number>) => setCurrentPage(pageNumber);
-
-  // Calcular la TCEA promedio de las facturas actuales
-  const calculateAverageTCEA = () => {
-    const totalTCEA = currentInvoices.reduce((sum, invoice) => sum + invoice.TCEA, 0);
-    return (totalTCEA / currentInvoices.length).toFixed(2);
-  };
-
-  const averageTCEA = calculateAverageTCEA();
-
-  // Función para exportar a PDF
   const exportToPDF = () => {
     const doc = new jsPDF("landscape");
-
-    const date = new Date();
-    const formattedDate = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
+    const formattedDate = new Date().toLocaleDateString();
 
     doc.text("Facturas - Reporte", 20, 20);
     doc.text(`Fecha: ${formattedDate}`, 20, 30);
+
     autoTable(doc, {
       head: [
         [
-          "Nombre", "Fecha Emisión", "Fecha Vencimiento", "Importe", "Moneda", 
-          "Costos Adicionales", "Tipo Tasa", "Tiempo Tasa", "Capitalización", 
-          "Valor Tasa", "Portes", "Descuento", "TCEA", "Responsable", 
-          "Mora", "Días Mora", "Comisión Tardía", "Protesto"
-        ]
+          "Nombre",
+          "Fecha Emisión",
+          "Fecha Vencimiento",
+          "Importe",
+          "Moneda",
+          "Costos Adicionales",
+          "Tipo Tasa",
+          "Tiempo Tasa",
+          "Capitalización",
+          "Valor Tasa",
+          "Portes",
+          "Descuento",
+          "TCEA",
+          "Responsable",
+          "Mora",
+          "Días Mora",
+          "Comisión Tardía",
+          "Protesto",
+        ],
       ],
-      body: filteredInvoices.map(invoice => [
-        invoice.nombre,
-        invoice.fecha_emision,
-        invoice.fecha_vencimiento,
-        invoice.importe.toFixed(2),
+      body: filteredFacturas.map((invoice) => [
+        invoice.id,
+        invoice.fechaEmision,
+        invoice.fechaVencimiento,
+        invoice.importeNominal,
         invoice.moneda,
-        invoice.costos_adicionales.map((cost: { descripcion: string; monto: number }) => `${cost.descripcion}: ${cost.monto.toFixed(2)}`).join(", "),
-        invoice.tipo_tasa,
-        invoice.tiempo_tasa,
+        invoice.costosAdicionales
+          .map(
+            (cost: { descripcion: any; monto: any }) =>
+              `${cost.descripcion}: ${safeToFixed(cost.monto)}`,
+          )
+          .join(", "),
+        invoice.tipoTasa,
+        invoice.tiempoTasa,
         invoice.capitalizacion,
-        invoice.valor_tasa.toFixed(2),
-        invoice.portes.toFixed(2),
-        invoice.descuento.toFixed(2),
-        invoice.TCEA.toFixed(2),
-        invoice.responsable,
-        invoice.mora ? "Sí" : "No",
-        invoice.dias_demora ? invoice.dias_demora : "-",
-        invoice.comision_tardia ? invoice.comision_tardia.toFixed(2) : "-",
-        invoice.protesto ? "Sí" : "No"
+        invoice.valorTasa,
+        invoice.portes,
       ]),
       startY: 35,
-      theme: "grid", // Usar el estilo de rejilla para la tabla
-      styles: {
-        cellWidth: 'auto', // Ajustar el ancho de las celdas automáticamente
-        fontSize: 6, // Ajustar el tamaño de la fuente a 6 (más pequeño)
-        overflow: "linebreak" // Para manejar el desbordamiento de texto
-      },
-      margin: { top: 20, left: 20, right: 20 }
+      theme: "grid",
+      styles: { cellWidth: "auto", fontSize: 6, overflow: "linebreak" },
+      margin: { top: 20, left: 20, right: 20 },
     });
-    doc.text(`TCEA Promedio: ${averageTCEA}%`, 20, (doc as any).autoTable.previous.finalY + 10);  // Agregar TCEA promedio al final
+
+    doc.text(`TCEA Promedio: 30%`, 20, (doc as any).lastAutoTable.finalY + 10);
     doc.save("facturas.pdf");
   };
 
-  if (!user) {
-    return <div>Loading usuario...</div>;
-  }
-
   return (
-    <main className="w-full max-w-none mx-auto p-4 space-y-6 bg-white text-black">
-      <div className="space-y-2">
-        <h1 className="text-3xl font-semibold text-center text-gray-800">Todas las Facturas</h1>
+    <main className="w-full max-w-6xl mx-auto p-4 space-y-6">
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-2xl font-bold text-gray-800">Todas las Facturas</h1>
+        <Link href="/dashboard/facturas/nueva">
+          <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
+            Nueva Factura
+          </button>
+        </Link>
       </div>
 
-      <div className="flex items-center justify-between mb-4 space-x-2">
+      <div className="flex items-center justify-end mb-4">
         <input
           type="date"
-          placeholder="Actualidad"
           value={selectedDate}
-          onChange={handleDateChange}
-          className="border border-black p-2 rounded-md text-gray-800 ml-auto"
+          onChange={(e) => setSelectedDate(e.target.value)}
+          className="border border-gray-300 p-2 rounded-md"
         />
       </div>
 
-      <div className="overflow-x-auto">
-        <table className="min-w-full text-sm text-center">
-          <thead>
-            <tr className="bg-black text-white">
-              <th className="p-4 font-medium border-b border-gray-500">Nombre</th>
-              <th className="p-4 font-medium border-b border-gray-500">Fecha Emisión</th>
-              <th className="p-4 font-medium border-b border-gray-500">Fecha Vencimiento</th>
-              <th className="p-4 font-medium border-b border-gray-500">Importe</th>
-              <th className="p-4 font-medium border-b border-gray-500">Moneda</th>
-              <th className="p-4 font-medium border-b border-gray-500">Costos Adicionales</th>
-              <th className="p-4 font-medium border-b border-gray-500">Tipo Tasa</th>
-              <th className="p-4 font-medium border-b border-gray-500">Tiempo Tasa</th>
-              <th className="p-4 font-medium border-b border-gray-500">Capitalización</th>
-              <th className="p-4 font-medium border-b border-gray-500">Valor Tasa</th>
-              <th className="p-4 font-medium border-b border-gray-500">Portes</th>
-              <th className="p-4 font-medium border-b border-gray-500">Descuento</th>
-              <th className="p-4 font-medium border-b border-gray-500">TCEA</th>
-              <th className="p-4 font-medium border-b border-gray-500">Responsable</th>
-              <th className="p-4 font-medium border-b border-gray-500">Mora</th>
-              <th className="p-4 font-medium border-b border-gray-500">Días Mora</th>
-              <th className="p-4 font-medium border-b border-gray-500">Comisión Tardía</th>
-              <th className="p-4 font-medium border-b border-gray-500">Protesto</th>
-            </tr>
-          </thead>
-          <tbody>
-            {currentInvoices.map((invoice, index) => (
-              <tr
-                key={index}
-                className={`${index % 2 === 0 ? "bg-gray-100" : "bg-white"} border-b border-gray-500`}
-              >
-                <td className="p-4">{invoice.nombre}</td>
-                <td className="p-4">{invoice.fecha_emision}</td>
-                <td className="p-4">{invoice.fecha_vencimiento}</td>
-                <td className="p-4">{invoice.importe.toFixed(2)}</td>
-                <td className="p-4">{invoice.moneda}</td>
-                <td className="p-4">
-                  {invoice.costos_adicionales.map((cost: { descripcion: string; monto: number }) => `${cost.descripcion}: ${cost.monto.toFixed(2)}`).join(", ")}
-                </td>
-                <td className="p-4">{invoice.tipo_tasa}</td>
-                <td className="p-4">{invoice.tiempo_tasa}</td>
-                <td className="p-4">{invoice.capitalizacion}</td>
-                <td className="p-4">{invoice.valor_tasa.toFixed(2)}</td>
-                <td className="p-4">{invoice.portes.toFixed(2)}</td>
-                <td className="p-4">{invoice.descuento.toFixed(2)}</td>
-                <td className="p-4">{invoice.TCEA.toFixed(2)}</td>
-                <td className="p-4">{invoice.responsable}</td>
-                <td className="p-4">{invoice.mora ? "Sí" : "No"}</td>
-                <td className="p-4">{invoice.dias_demora ? invoice.dias_demora : "-"}</td>
-                <td className="p-4">{invoice.comision_tardia ? invoice.comision_tardia.toFixed(2) : "-"}</td>
-                <td className="p-4">{invoice.protesto ? "Sí" : "No"}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      {}
+      <FacturaTable facturas={currentInvoices} />
 
       <div className="flex items-center justify-between mt-4 space-x-4">
-        <div className="flex items-center">
-          <button onClick={exportToPDF} className="border border-black px-4 py-2 rounded-md text-gray-800 bg-white hover:bg-gray-100">
-            Exportar PDF
-          </button>
-        </div>
-
+        <button
+          onClick={exportToPDF}
+          className="border border-black px-4 py-2 rounded-md text-gray-800 bg-white hover:bg-gray-100"
+        >
+          Exportar PDF
+        </button>
         <div className="flex items-center space-x-4">
           <button
             onClick={() => paginate(currentPage - 1)}
@@ -197,11 +162,13 @@ export default function AllInvoicesPage() {
           >
             &lt;
           </button>
-          
           <button
             onClick={() => paginate(currentPage + 1)}
-            className={`border border-black px-4 py-2 rounded-full ${currentPage === Math.ceil(filteredInvoices.length / invoicesPerPage) ? "bg-gray-200" : "bg-white"} text-gray-800`}
-            disabled={currentPage === Math.ceil(filteredInvoices.length / invoicesPerPage)}
+            className={`border border-black px-4 py-2 rounded-full ${currentPage === Math.ceil(filteredFacturas.length / invoicesPerPage) ? "bg-gray-200" : "bg-white"} text-gray-800`}
+            disabled={
+              currentPage ===
+              Math.ceil(filteredFacturas.length / invoicesPerPage)
+            }
           >
             &gt;
           </button>
