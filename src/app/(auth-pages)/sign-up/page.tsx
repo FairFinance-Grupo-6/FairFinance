@@ -25,7 +25,9 @@ export default function Signup({ searchParams }: { searchParams: Message }) {
 
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+  ) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
@@ -44,14 +46,16 @@ export default function Signup({ searchParams }: { searchParams: Message }) {
   return (
     <>
       <form className="flex flex-col min-w-80 max-w-90 mx-auto">
-        <h1 className="text-2xl font-medium">Te damos la bienvenida a FairFinance!</h1>
+        <h1 className="text-2xl font-medium">
+          Te damos la bienvenida a FairFinance!
+        </h1>
         <p className="text-sm text text-foreground mb-4">
           Por favor, completa los cuadros con tu información
         </p>
 
-        {/* Diseño de 2 columnas */}
+        {}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Nombre */}
+          {}
           <div>
             <Label htmlFor="firstName">Nombre</Label>
             <Input
@@ -63,7 +67,7 @@ export default function Signup({ searchParams }: { searchParams: Message }) {
             />
           </div>
 
-          {/* Apellidos */}
+          {}
           <div>
             <Label htmlFor="lastName">Apellidos</Label>
             <Input
@@ -75,7 +79,7 @@ export default function Signup({ searchParams }: { searchParams: Message }) {
             />
           </div>
 
-          {/* DNI */}
+          {}
           <div>
             <Label htmlFor="dni">DNI</Label>
             <Input
@@ -87,7 +91,7 @@ export default function Signup({ searchParams }: { searchParams: Message }) {
             />
           </div>
 
-          {/* Celular */}
+          {}
           <div>
             <Label htmlFor="phone">Celular</Label>
             <Input
@@ -99,7 +103,7 @@ export default function Signup({ searchParams }: { searchParams: Message }) {
             />
           </div>
 
-          {/* Correo */}
+          {}
           <div>
             <Label htmlFor="email">Correo</Label>
             <Input
@@ -112,7 +116,7 @@ export default function Signup({ searchParams }: { searchParams: Message }) {
             />
           </div>
 
-          {/* Dirección */}
+          {}
           <div>
             <Label htmlFor="address">Dirección</Label>
             <Input
@@ -124,7 +128,7 @@ export default function Signup({ searchParams }: { searchParams: Message }) {
             />
           </div>
 
-          {/* RUC */}
+          {}
           <div>
             <Label htmlFor="ruc">RUC</Label>
             <Input
@@ -152,8 +156,10 @@ export default function Signup({ searchParams }: { searchParams: Message }) {
           </div>
         </div>
 
-        {/* Contraseña */}
-        <Label htmlFor="password" className="mt-4">Contraseña</Label>
+        {}
+        <Label htmlFor="password" className="mt-4">
+          Contraseña
+        </Label>
         <div className="relative mb-3">
           <Input
             type={showPassword ? "text" : "password"}
@@ -173,15 +179,15 @@ export default function Signup({ searchParams }: { searchParams: Message }) {
           </button>
         </div>
 
-        {/* Botón de Registro */}
+        {}
         <SubmitButton formAction={signUpAction} pendingText="Creando cuenta...">
           Crear cuenta
         </SubmitButton>
 
-        {/* Mensajes de validación */}
+        {}
         <FormMessage message={searchParams} />
 
-        {/* Texto final */}
+        {}
         <p className="mt-4 text-center text-[#FF5035]">
           ¿Tienes una cuenta?{" "}
           <Link href="/sign-in" className="underline font-medium">
