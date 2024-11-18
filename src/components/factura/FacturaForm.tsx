@@ -8,12 +8,13 @@ import { FacturaCostosSection } from "../FacturaForm/FacturaCostosSection";
 import { FacturaTasasSection } from "../FacturaForm/FacturaTasasSection";
 import { FacturaMoraSection } from "../FacturaForm/FacturaMoraSection";
 import { FacturaResultadoSection } from "../FacturaForm/FacturaResultado";
+import { saveInvoice } from "@/app/actions";
 
 interface FacturaFormProps {
   onSave: (facturaData: any) => void;
 }
 
-export default function FacturaForm({ onSave }: FacturaFormProps) {
+export default function FacturaForm() {
   const {
     factura,
     tcea,
@@ -25,11 +26,18 @@ export default function FacturaForm({ onSave }: FacturaFormProps) {
     removeCosto,
     addCostoMora,
     removeCostoMora,
-    handleSubmit,
-  } = useFactura(onSave);
+  } = useFactura();
+
+  const handleSaveInvoice = () => {
+    const factura_to_save = {
+      ...factura,
+      tcea: tcea
+    }
+    saveInvoice(factura_to_save);
+  }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSaveInvoice} className="space-y-6">
       <FacturaInfoSection
         factura={factura}
         handleInputChange={handleInputChange}

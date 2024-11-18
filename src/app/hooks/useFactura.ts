@@ -45,7 +45,7 @@ export interface Factura {
     tcea: number | null;
 }
 
-export const useFactura = (onSave: (factura: Factura) => void) => {
+export const useFactura = () => {
     const [factura, setFactura] = useState({
         id: 0,
         fechaEmision: "",
@@ -267,14 +267,6 @@ export const useFactura = (onSave: (factura: Factura) => void) => {
         setTcea(null);
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!isTceaCalculated) {
-            alert("Por favor, calcula el TCEA antes de guardar.");
-            return;
-        }
-        onSave({ ...factura, tcea });
-    };
     
     return {
         factura,
@@ -287,8 +279,5 @@ export const useFactura = (onSave: (factura: Factura) => void) => {
         removeCosto,
         addCostoMora,
         removeCostoMora,
-        handleSubmit,
     };
 };
-
-

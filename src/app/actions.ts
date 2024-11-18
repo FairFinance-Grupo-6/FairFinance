@@ -71,6 +71,53 @@ export async function signUpAction(formData: FormData): Promise<any> {
   }
 }
 
+export async function saveInvoice(factura: any): Promise<any> {
+  console.log("formData", factura);
+  const supabase = await createClient();
+  const facturaData = factura;
+  try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    const user_id = user?.id || "unknown";
+    console.log("user", user);
+
+    const invoice_to_save = {
+      idFactura: facturaData.id,
+      fechaEmision: facturaData.fechaEmision,
+      fechaVencimiento: facturaData.fechaVencimiento,
+      plazoDescuento: parseInt(facturaData.plazoDescuento || "0"),
+      importeNominal: facturaData.importeNominal,
+      moneda: facturaData.moneda,
+      tipoTasa: facturaData.tipoTasa,
+      tiempoTasa: facturaData.tiempoTasa,
+      capitalizacion: facturaData.capitalizacion,
+      valorTasa: parseInt(facturaData.valorTasa || "0"),
+      costosAdicionales: facturaData.costosAdicionales.reduce((acc: number, costo: any) => {
+        return acc + parseFloat(costo.monto);
+      }, 0),
+      costosMora: facturaData.costosMora.reduce((acc: number, costo: any) => {
+        return acc + parseFloat(costo.monto);
+      }, 0),
+      portes: parseInt(facturaData.portes || "0"),
+      retencion: parseInt(facturaData.retencion || "0"),
+      tipoTasaMora: facturaData.tipoTasaMora,
+      tiempoTasaMora: facturaData.tiempoTasaMora,
+      capitalizacionMora: facturaData.capitalizacionMora,
+      valorTasaMora: facturaData.valorTasaMora,
+      diasMora: parseInt(facturaData.diasMora || "0"),
+      conMora: facturaData.conMora,
+      tcea: facturaData.tcea,
+      user_id: user_id, // Aquí se asegura que el valor esté disponible
+    };
+
+    console.log("invoice_to_save", invoice_to_save);
+    await supabase.from("documents").insert([invoice_to_save]);
+  } catch (err) {
+    console.error("Error inesperado:", err);
+  }
+}
+
 export const signInAction = async (formData: FormData) => {
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;

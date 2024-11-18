@@ -42,7 +42,7 @@ export const FacturaMoraSection: React.FC<FacturaMoraSectionProps> = ({
           checked={factura.conMora}
           onChange={handleInputChange}
         />
-         <span> ¿Es con mora? </span>
+        <span> ¿Es con mora? </span>
       </label>
     </div>
     {factura.conMora && (

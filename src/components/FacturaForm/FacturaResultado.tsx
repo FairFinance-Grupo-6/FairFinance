@@ -15,7 +15,13 @@ export const FacturaResultadoSection: React.FC<
     {tcea !== null && (
       <div className="text-center text-lg font-semibold">
         TCEA Calculado:{" "}
-        <span className="text-blue-600">{tcea.toFixed(7)}%</span>
+        <input
+          type="text"
+          name="tcea"
+          value={tcea !== null ? tcea.toFixed(7) : ""}
+          readOnly
+          className="text-center text-blue-600 border-none bg-transparent"
+        />
       </div>
     )}
     <button
@@ -28,11 +34,10 @@ export const FacturaResultadoSection: React.FC<
     <button
       type="submit"
       disabled={!isTceaCalculated}
-      className={`w-full py-3 rounded-md transition ${
-        isTceaCalculated
-          ? "bg-blue-600 text-white hover:bg-blue-700"
-          : "bg-gray-300 text-gray-500 cursor-not-allowed"
-      }`}
+      className={`w-full py-3 rounded-md transition ${isTceaCalculated
+        ? "bg-blue-600 text-white hover:bg-blue-700"
+        : "bg-gray-300 text-gray-500 cursor-not-allowed"
+        }`}
     >
       Guardar Factura
     </button>
