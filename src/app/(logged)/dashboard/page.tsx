@@ -64,7 +64,7 @@ export default function Dashboard() {
   }
 
   return (
-    <main className={`w-full mx-auto space-y-6 text-black`}>
+    <main className={`w-full mx-auto space-y-6 text-black pt-20`}>
       <div className="flex items-center justify-between space-x-4">
         <div>
           <h1 className="text-2xl font-semibold">
