@@ -16,6 +16,18 @@ export default function BriefcasesPage() {
   const { theme, setTheme, systemTheme } = useTheme();
   const [user, setUser] = useState<typeof mockUser | null>(null);
 
+  useEffect(() => {
+    const checkUser = () => {
+      supabase.auth.getUser().then(({ data }) => {
+        mockUser.email = data.user?.email || "";
+        mockUser.name = data.user?.email?.split("@")[0] || "";
+
+        setUser(mockUser);
+      });
+    };
+    checkUser();
+  }, []);
+
   const currentTheme = theme === "system" ? systemTheme : theme;
 
   if (!user) {

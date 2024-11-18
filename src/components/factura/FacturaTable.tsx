@@ -23,6 +23,9 @@ interface Factura {
   valorTasa: string;
   costosAdicionales: CostoAdicional[];
   portes: string;
+  descuento: number;
+  TCEA: number;
+  responsable: string;
 }
 
 interface FacturaTableProps {
@@ -60,9 +63,18 @@ export const FacturaTable: React.FC<FacturaTableProps> = ({ facturas }) => {
               Capitalización
             </th>
             <th className="p-4 font-medium border-b border-gray-500">
-              Valor Tasa
+              Valor Tasa(%)
             </th>
             <th className="p-4 font-medium border-b border-gray-500">Portes</th>
+            <th className="p-4 font-medium border-b border-gray-500">
+              Descuento
+            </th>
+            <th className="p-4 font-medium border-b border-gray-500">
+              TCEA(%)
+            </th>
+            <th className="p-4 font-medium border-b border-gray-500">
+              Responsable
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -92,6 +104,9 @@ export const FacturaTable: React.FC<FacturaTableProps> = ({ facturas }) => {
               <td className="p-4">{invoice.capitalizacion}</td>
               <td className="p-4">{invoice.valorTasa}</td>
               <td className="p-4">{invoice.portes}</td>
+              <td className="p-4">{invoice.descuento}</td>
+              <td className="p-4">{invoice.TCEA}</td>
+              <td className="p-4">{invoice.responsable}</td>
             </tr>
           ))}
         </tbody>
@@ -100,11 +115,3 @@ export const FacturaTable: React.FC<FacturaTableProps> = ({ facturas }) => {
   );
 };
 
-/*
-           <td className="p-4">{invoice.descuento.toFixed(2)}</td>
-           <td className="p-4">{invoice.TCEA.toFixed(2)}</td>
-           <td className="p-4">{invoice.responsable}</td>
-           <td className="p-4">{invoice.mora ? "Sí" : "No"}</td>
-           <td className="p-4">{invoice.dias_demora ? invoice.dias_demora : "-"}</td>
-           <td className="p-4">{invoice.comision_tardia ? invoice.comision_tardia.toFixed(2) : "-"}</td>
-           <td className="p-4">{invoice.protesto ? "Sí" : "No"}</td> */

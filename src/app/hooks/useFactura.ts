@@ -47,7 +47,7 @@ export interface Factura {
 
 export const useFactura = (onSave: (factura: Factura) => void) => {
     const [factura, setFactura] = useState({
-        id: -1,
+        id: 0,
         fechaEmision: "",
         fechaVencimiento: "",
         plazoDescuento: "",

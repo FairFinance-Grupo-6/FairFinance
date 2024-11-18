@@ -28,6 +28,9 @@ interface Factura {
   valorTasa: string;
   costosAdicionales: CostoAdicional[];
   portes: string;
+  TCEA: number;
+  descuento: number;
+  responsable: string;
 }
 
 interface FacturaTableProps {
@@ -38,7 +41,7 @@ export default function FacturasPage() {
   const [facturas, setFacturas] = useState<Factura[]>([]);
   const [selectedDate, setSelectedDate] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const invoicesPerPage = 4;
+  const invoicesPerPage = 7;
 
   useEffect(() => {
     setFacturas(mockInvoices);
@@ -46,7 +49,9 @@ export default function FacturasPage() {
 
   const filteredFacturas = facturas.filter((factura) => {
     if (selectedDate) {
-      return factura.fechaEmision == selectedDate;
+      const facturaFecha = new Date(factura.fechaEmision);
+      const selectedFecha = new Date(selectedDate);
+      return facturaFecha <= selectedFecha; // Verifica si la fecha es menor o igual a la seleccionada
     }
     return true;
   });
@@ -70,7 +75,7 @@ export default function FacturasPage() {
     const doc = new jsPDF("landscape");
     const formattedDate = new Date().toLocaleDateString();
 
-    doc.text("Facturas - Reporte", 20, 20);
+    doc.text("Lista de Facturas - Reporte", 20, 20);
     doc.text(`Fecha: ${formattedDate}`, 20, 30);
 
     autoTable(doc, {
@@ -90,10 +95,6 @@ export default function FacturasPage() {
           "Descuento",
           "TCEA",
           "Responsable",
-          "Mora",
-          "Días Mora",
-          "Comisión Tardía",
-          "Protesto",
         ],
       ],
       body: filteredFacturas.map((invoice) => [
@@ -113,6 +114,9 @@ export default function FacturasPage() {
         invoice.capitalizacion,
         invoice.valorTasa,
         invoice.portes,
+        safeToFixed(invoice.descuento),
+        safeToFixed(invoice.TCEA),
+        invoice.responsable,
       ]),
       startY: 35,
       theme: "grid",

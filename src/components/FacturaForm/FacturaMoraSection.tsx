@@ -33,7 +33,7 @@ export const FacturaMoraSection: React.FC<FacturaMoraSectionProps> = ({
   removeCostoMora,
 }) => (
   <div className="bg-white shadow p-6 rounded-md space-y-4">
-    <h2 className="text-xl font-semibold">Mora</h2>
+    <h2 className="text-xl font-semibold">Información Moratoria</h2>
     <div>
       <label>
         <input
@@ -42,7 +42,7 @@ export const FacturaMoraSection: React.FC<FacturaMoraSectionProps> = ({
           checked={factura.conMora}
           onChange={handleInputChange}
         />
-        ¿Es con mora?
+         <span> ¿Es con mora? </span>
       </label>
     </div>
     {factura.conMora && (

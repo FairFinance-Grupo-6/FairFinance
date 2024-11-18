@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Clock } from "lucide-react";
 import { useTheme } from "next-themes";
 import Link from "next/link";
+import mockInvoices from "@/app/data/invoices.json";
 import { supabase } from "@/utils/supabase/client";
 
 const mockUser = {
@@ -30,32 +31,45 @@ export default function Dashboard() {
 
   const currentTheme = theme === "system" ? systemTheme : theme;
 
+  const colorStyles = {
+    light: {
+      text: "text-[#31294C]",
+      buttonBg: "bg-[#5756BB]",
+      buttonHover: "hover:bg-[#8182DA] hover:scale-105 transition-all duration-300",
+      border: "border-[#000000]",
+      mutedText: "text-[#8182DA]",
+    },
+    dark: {
+      text: "text-[#E1B1E8]",
+      buttonBg: "bg-[#5756BB]",
+      buttonHover: "hover:bg-[#8182DA] hover:scale-105 transition-all duration-300",
+      border: "border-[#31294C]",
+      mutedText: "text-[#D3A3DA]",
+    },
+  };
+
+  const styles = currentTheme === "dark" ? colorStyles.dark : colorStyles.light;
+
   if (!user) {
     return <div>Loading...</div>;
   }
 
   return (
-    <main
-      className={`w-full max-w-3xl mx-auto p-4 space-y-6 ${
-        currentTheme === "dark"
-          ? "bg-gray-900 text-white"
-          : "bg-white text-black"
-      }`}
-    >
+    <main className={`w-full max-w-7xl mx-auto space-y-6 text-black`}>
       <div className="p-4">
         <h1 className="text-2xl font-semibold">
           Bienvenido a tu Dashboard, {user.name}
         </h1>
-        <p>Email: {user.email}</p>
-        <span className="text-gray-500 font-normal">
-          {" "}
+        <span className={`${styles.mutedText} font-normal`}>
           Estas son tus facturas registradas
         </span>
       </div>
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <h2 className="text-xl">Overview</h2>
-          <button className="flex items-center justify-between bg-black p-3 pl-4 pr-20 text-white rounded">
+          <button
+            className={`flex items-center justify-between ${styles.buttonBg} p-3 pl-4 pr-20 text-white rounded ${styles.buttonHover}`}
+          >
             <Clock className="mr-2 h-4 w-4" />
             <Link href="/dashboard/facturas">
               <p className="pl-2 w-36">Ver Todas</p>
@@ -65,30 +79,32 @@ export default function Dashboard() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="border-2 p-6 space-y-4">
-          <div className="w-8 h-8 bg-black rounded-full" />
+        <div className={`border-2 p-6 space-y-4 ${styles.border}`}>
+          <div className={`w-8 h-8 ${styles.buttonBg} rounded-full`} />
           <div>
-            <div className="text-sm text-gray-500">Emisión 7/1/2024</div>
+            <div className={`text-sm ${styles.mutedText}`}>Emisión 7/1/2024</div>
             <div className="text-2xl font-semibold">S/ 5,000.00</div>
-            <div className="text-sm text-gray-500">Soles</div>
+            <div className={`text-sm ${styles.mutedText}`}>Soles</div>
           </div>
         </div>
 
-        <div className="border-2 p-6 space-y-4">
-          <div className="w-8 h-8 bg-black rounded-full" />
+        <div className={`border-2 p-6 space-y-4 ${styles.border}`}>
+          <div className={`w-8 h-8 ${styles.buttonBg} rounded-full`} />
           <div>
-            <div className="text-sm text-gray-500">Emisión 7/15/2024</div>
+            <div className={`text-sm ${styles.mutedText}`}>Emisión 7/15/2024</div>
             <div className="text-2xl font-semibold">$ 8,000.00</div>
-            <div className="text-sm text-gray-500">Dólares</div>
+            <div className={`text-sm ${styles.mutedText}`}>Dólares</div>
           </div>
         </div>
       </div>
 
       <div className="space-y-2">
-        <Button className="w-full bg-black text-white hover:bg-gray-800">
-          <Link href="/dashboard/nueva-factura">Agregar Factura</Link>
+        <Button className={`w-full ${styles.buttonBg} text-white ${styles.buttonHover}`}>
+          <Link href="/dashboard/facturas/nueva">Agregar Factura</Link>
         </Button>
-        <Button variant="outline" className="w-full border-2 hover:bg-gray-100">
+        <Button
+          className={`w-full ${styles.buttonBg} text-white ${styles.buttonHover}`}
+        >
           <Link href="/dashboard/cartera">Calcular TCEA de Carteras</Link>
         </Button>
       </div>
