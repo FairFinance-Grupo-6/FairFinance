@@ -14,7 +14,7 @@ export default function NuevaFactura() {
 
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-6">
-      <h1 className="text-2xl font-bold text-center">Nueva Factura</h1>
+      <h1 className="text-3xl font-extrabold text-[#5756BB] mb-6 text-center">Nueva Factura</h1>
       <FacturaForm onSave={handleSaveFactura} />
     </div>
   );

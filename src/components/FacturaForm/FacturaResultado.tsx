@@ -21,7 +21,7 @@ export const FacturaResultadoSection: React.FC<
     <button
       type="button"
       onClick={handleCalculateTcea}
-      className="w-full bg-green-600 text-white py-3 rounded-md hover:bg-green-700 transition"
+      className="w-full bg-[#5756BB] hover:bg-[#8182DA] hover:scale-105 transition-all duration-300 text-white py-3 rounded-md"
     >
       Calcular TCEA
     </button>
