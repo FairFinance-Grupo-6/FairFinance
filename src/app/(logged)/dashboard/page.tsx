@@ -4,102 +4,151 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Clock } from "lucide-react";
 import { useTheme } from "next-themes";
-import Link from 'next/link';
-import { createClient } from "../../../utils/supabase/client";
-
-// Define un usuario constante
+import Link from "next/link";
+import Image from "next/image";
+import { supabase } from "@/utils/supabase/client";
 
 const mockUser = {
-  email: "usuario@example.com",
-  name: "Usuario Ejemplo",
+	email: "usuario@example.com",
+	name: "Usuario Ejemplo",
 };
 
-
-
 export default function Dashboard() {
-  const { theme, setTheme, systemTheme } = useTheme();
-  const [user, setUser] = useState<typeof mockUser | null>(null); // Cambia el tipo aquí
+	const { theme, setTheme, systemTheme } = useTheme();
+	const [user, setUser] = useState<typeof mockUser | null>(null);
+	const [invoices, setInvoices] = useState<any[]>([]); // Estado para almacenar las facturas
 
-  useEffect(() => {
-    // Simula la autenticación y establece el usuario
-    const checkUser = () => {
-      createClient().auth.getUser().then(({ data }) => {
-        mockUser.email = data.user?.email || "";
-        mockUser.name = data.user?.email?.split("@")[0] || "";
+	useEffect(() => {
+		const checkUser = () => {
+			supabase.auth.getUser().then(({ data }) => {
+				mockUser.email = data.user?.email || "";
+				mockUser.name = data.user?.email?.split("@")[0] || "";
+				setUser(mockUser);
+				supabase
+					.from("documents")
+					.select("*")
+					.eq("user_id", data.user?.id)
+					.then(({ data, error }) => {
+						if (error) {
+							console.error(error);
+						} else {
+							console.log(data);
+							setInvoices(data);
+						}
+					});
+			});
+		};
+		checkUser();
+	}, []);
 
-        setUser(mockUser);
-      });
-      // Aquí simplemente asignamos el usuario constante
-    };
-    checkUser();
-  }, []);
+	const currentTheme = theme === "system" ? systemTheme : theme;
 
-  const currentTheme = theme === "system" ? systemTheme : theme;
+	const colorStyles = {
+		light: {
+			text: "text-[#31294C]",
+			buttonBg: "bg-[#5756BB]",
+			buttonHover:
+				"hover:bg-[#8182DA] hover:scale-105 transition-all duration-300",
+			border: "border-[#000000]",
+			mutedText: "text-[#8182DA]",
+		},
+		dark: {
+			text: "text-[#E1B1E8]",
+			buttonBg: "bg-[#5756BB]",
+			buttonHover:
+				"hover:bg-[#8182DA] hover:scale-105 transition-all duration-300",
+			border: "border-[#31294C]",
+			mutedText: "text-[#D3A3DA]",
+		},
+	};
 
-  if (!user) {
-    return <div>Loading...</div>; // Mientras se establece el usuario
-  }
+	const styles = currentTheme === "dark" ? colorStyles.dark : colorStyles.light;
 
-  return (
-    
-    <main
-      className={`w-full max-w-3xl mx-auto p-4 space-y-6 ${
-        currentTheme === "dark" ? "bg-gray-900 text-white" : "bg-white text-black"
-      }`}
-    >
-      <div className="p-4">
-      <h1 className="text-2xl font-semibold">Bienvenido a tu Dashboard, {user.name}</h1>
-      <p>Email: {user.email}</p>
-      <span className="text-gray-500 font-normal"> Estas son tus facturas registradas</span>
-      </div>
-      <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl">Overview</h2>
-          <button className="flex items-center justify-between bg-black p-3 pl-4 pr-20 text-white rounded">
-            <Clock className="mr-2 h-4 w-4" />
-            <Link href="/dashboard/facturas">
-              <p className="pl-2 w-36">Ver Todas</p>
-            </Link>
-          </button>
-        </div>
-      </div>
+	// Ordenar las facturas por fecha de emisión (más recientes primero) y seleccionar las 4 primeras
+	const sortedInvoices = invoices
+		.sort(
+			(a, b) =>
+				new Date(b.fechaEmision).getTime() - new Date(a.fechaEmision).getTime(),
+		)
+		.slice(0, 4);
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="border-2 p-6 space-y-4">
-          <div className="w-8 h-8 bg-black rounded-full" />
-          <div>
-            <div className="text-sm text-gray-500">Emisión 7/1/2024</div>
-            <div className="text-2xl font-semibold">S/ 5,000.00</div>
-            <div className="text-sm text-gray-500">Soles</div>
-          </div>
-        </div>
+	if (!user) {
+		return <div>Loading...</div>;
+	}
 
-        <div className="border-2 p-6 space-y-4">
-          <div className="w-8 h-8 bg-black rounded-full" />
-          <div>
-            <div className="text-sm text-gray-500">Emisión 7/15/2024</div>
-            <div className="text-2xl font-semibold">$ 8,000.00</div>
-            <div className="text-sm text-gray-500">Dólares</div>
-          </div>
-        </div>
-      </div>
+	return (
+		<main className={"w-full mx-auto space-y-6 text-black pt-20"}>
+			<div className="flex items-center justify-between space-x-4">
+				<div>
+					<h1 className="text-2xl font-semibold">
+						Bienvenido a tu Dashboard, {user.name}
+					</h1>
+					<span className={`${styles.mutedText} font-normal`}>
+						Estas son tus facturas registradas
+					</span>
+				</div>
 
-      <div className="space-y-2">
-        <Button className="w-full bg-black text-white hover:bg-gray-800">
-          <Link href="/dashboard/nueva-factura">
-            Agregar Factura
-          </Link>
-        </Button>
-        <Button variant="outline" className="w-full border-2 hover:bg-gray-100">
-           <Link href="/dashboard/cartera">
-             Calcular TCEA de Carteras        
-           </Link>
-        </Button>
-      </div>
-    </main>
-  );
+				<div className="flex flex-col items-center justify-center">
+					<Image
+						src="/cat1.png"
+						alt="Imagen de saludo"
+						width={110}
+						height={110}
+					/>
+
+					<button
+						type="button"
+						className={`flex items-center justify-between ${styles.buttonBg} p-3 pl-4 pr-20 text-white rounded ${styles.buttonHover}`}
+					>
+						<Clock className="mr-2 h-4 w-4" />
+						<Link href="/dashboard/facturas">
+							<p className="w-36">Ver Todas</p>
+						</Link>
+					</button>
+				</div>
+			</div>
+
+			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+				{sortedInvoices.map((invoice) => (
+					<div
+						key={invoice.id}
+						className="bg-white/30 backdrop-blur-lg rounded-lg p-6 space-y-4 shadow-lg"
+					>
+						{/* Fondo blurry y bordes redondeados */}
+						<div>
+							<div className="text-sm text-gray-500">
+								Factura: {invoice.idFactura}
+							</div>
+							<div className="text-sm text-gray-500">
+								Fecha de emisión: {invoice.fechaEmision}
+							</div>
+							<div className="text-xl font-semibold">
+								{invoice.moneda} {invoice.importeNominal}
+							</div>
+							<div className="text-xl font-semibold">
+								TCEA: {Number.parseFloat(invoice.tcea).toFixed(2)}%
+							</div>
+						</div>
+					</div>
+				))}
+			</div>
+
+			<div className="space-y-2">
+				<div className="flex justify-left gap-4">
+					{" "}
+					{/* Esto coloca los botones centrados con espacio entre ellos */}
+					<Button
+						className={`w-auto ${styles.buttonBg} text-white ${styles.buttonHover}`}
+					>
+						<Link href="/dashboard/facturas/nueva">Agregar Factura</Link>
+					</Button>
+					<Button
+						className={`w-auto ${styles.buttonBg} text-white ${styles.buttonHover}`}
+					>
+						<Link href="/dashboard/cartera">Calcular TCEA de Carteras</Link>
+					</Button>
+				</div>
+			</div>
+		</main>
+	);
 }
-
-
-
-

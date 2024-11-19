@@ -1,212 +1,267 @@
-"use client"
+"use client";
 
-import { SetStateAction, useEffect, useState } from "react";
+import { useState, useEffect } from "react";
+import { FacturaTable } from "@/components/factura/FacturaTable";
+import Link from "next/link";
+import Image from "next/image";
+import cat3 from "@/public/cat2.png";
 import mockInvoices from "@/app/data/invoices.json";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
+import { supabase } from "@/utils/supabase/client";
 
-const mockUser = {
-  email: "usuario@example.com",
-  name: "Usuario Ejemplo",
-};
+interface CostoAdicional {
+	id: number;
+	descripcion: string;
+	monto: string;
+	esPorcentaje: boolean;
+	pagadoAlInicio: boolean;
+}
 
-export default function AllInvoicesPage() {
-  const [user, setUser] = useState<typeof mockUser | null>(null);
-  const [invoices, setInvoices] = useState<any[]>(mockInvoices);
-  const [filteredInvoices, setFilteredInvoices] = useState<any[]>(mockInvoices);
-  const [selectedDate, setSelectedDate] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
-  const invoicesPerPage = 7;
+interface Factura {
+	id: number;
+	fechaEmision: string;
+	fechaVencimiento: string;
+	plazoDescuento: string;
+	importeNominal: string;
+	moneda: string;
+	tipoTasa: string;
+	tiempoTasa: string;
+	capitalizacion: string;
+	valorTasa: string;
+	costosAdicionales: number;
+	portes: string;
+	TCEA: number;
+	descuento: number;
+	mora: boolean;
+	diasDemora: number;
+	comisionTardia: string;
+	protesto: boolean;
+	responsable: string;
+}
 
-  useEffect(() => {
-    const checkUser = () => {
-      setUser(mockUser);
-    };
-    checkUser();
-  }, []);
+interface FacturaTableProps {
+	facturas: Factura[];
+}
 
-  useEffect(() => {
-    if (selectedDate) {
-      const filtered = invoices.filter((invoice) =>
-        new Date(invoice.fecha_vencimiento) <= new Date(selectedDate)
-      );
-      setFilteredInvoices(filtered);
-    } else {
-      setFilteredInvoices(invoices);
-    }
-  }, [selectedDate, invoices]);
+export default function FacturasPage() {
+	const [facturas, setFacturas] = useState<Factura[]>([]);
+	const [selectedDate, setSelectedDate] = useState("");
+	const [currentPage, setCurrentPage] = useState(1);
+	const invoicesPerPage = 7;
+	const [showTooltip, setShowTooltip] = useState(false);
 
-  const indexOfLastInvoice = currentPage * invoicesPerPage;
-  const indexOfFirstInvoice = indexOfLastInvoice - invoicesPerPage;
-  const currentInvoices = filteredInvoices.slice(indexOfFirstInvoice, indexOfLastInvoice);
+	useEffect(() => {
+		// Ordena las facturas por fecha de emisión de la más antigua a la más reciente
+		supabase.auth.getUser().then(({ data }) => {
+			supabase
+				.from("documents")
+				.select("*")
+				.eq("user_id", data.user?.id)
+				.then(({ data, error }) => {
+					if (error) {
+						console.error(error);
+					} else {
+						console.log(data);
+						setFacturas(data);
+					}
+				});
+		});
+		/* 		const sortedFacturas = [...mockInvoices].sort((a, b) => {
+			const dateA = new Date(a.fechaEmision);
+			const dateB = new Date(b.fechaEmision);
+			return dateA.getTime() - dateB.getTime(); // Ordenar de la más antigua a la más reciente
+		});
+		setFacturas(sortedFacturas); */
+	}, []);
 
-  const handleDateChange = (e: { target: { value: SetStateAction<string>; }; }) => {
-    setSelectedDate(e.target.value);
-    setCurrentPage(1); // Reset to first page when date changes
-  };
+	const filteredFacturas = facturas.filter((factura) => {
+		if (selectedDate) {
+			const facturaFecha = new Date(factura.fechaEmision);
+			const selectedFecha = new Date(selectedDate);
+			return facturaFecha <= selectedFecha; // Verifica si la fecha es menor o igual a la seleccionada
+		}
+		return true;
+	});
 
-  const paginate = (pageNumber: SetStateAction<number>) => setCurrentPage(pageNumber);
+	const indexOfLastInvoice = currentPage * invoicesPerPage;
+	const indexOfFirstInvoice = indexOfLastInvoice - invoicesPerPage;
+	const currentInvoices = filteredFacturas.slice(
+		indexOfFirstInvoice,
+		indexOfLastInvoice,
+	);
 
-  // Calcular la TCEA promedio de las facturas actuales
-  const calculateAverageTCEA = () => {
-    const totalTCEA = currentInvoices.reduce((sum, invoice) => sum + invoice.TCEA, 0);
-    return (totalTCEA / currentInvoices.length).toFixed(2);
-  };
+	const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
 
-  const averageTCEA = calculateAverageTCEA();
+	const safeToFixed = (value: any, decimals: number = 2) => {
+		return typeof value === "number" && !isNaN(value)
+			? value.toFixed(decimals)
+			: "0.00";
+	};
 
-  // Función para exportar a PDF
-  const exportToPDF = () => {
-    const doc = new jsPDF("landscape");
+	const exportToPDF = () => {
+		const doc = new jsPDF("landscape");
+		const formattedDate = new Date().toLocaleDateString();
 
-    const date = new Date();
-    const formattedDate = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
+		doc.text("Lista de Facturas", 20, 20);
+		doc.text(`Fecha: ${formattedDate}`, 20, 30);
 
-    doc.text("Facturas - Reporte", 20, 20);
-    doc.text(`Fecha: ${formattedDate}`, 20, 30);
-    autoTable(doc, {
-      head: [
-        [
-          "Nombre", "Fecha Emisión", "Fecha Vencimiento", "Importe", "Moneda", 
-          "Costos Adicionales", "Tipo Tasa", "Tiempo Tasa", "Capitalización", 
-          "Valor Tasa", "Portes", "Descuento", "TCEA", "Responsable", 
-          "Mora", "Días Mora", "Comisión Tardía", "Protesto"
-        ]
-      ],
-      body: filteredInvoices.map(invoice => [
-        invoice.nombre,
-        invoice.fecha_emision,
-        invoice.fecha_vencimiento,
-        invoice.importe.toFixed(2),
-        invoice.moneda,
-        invoice.costos_adicionales.map((cost: { descripcion: string; monto: number }) => `${cost.descripcion}: ${cost.monto.toFixed(2)}`).join(", "),
-        invoice.tipo_tasa,
-        invoice.tiempo_tasa,
-        invoice.capitalizacion,
-        invoice.valor_tasa.toFixed(2),
-        invoice.portes.toFixed(2),
-        invoice.descuento.toFixed(2),
-        invoice.TCEA.toFixed(2),
-        invoice.responsable,
-        invoice.mora ? "Sí" : "No",
-        invoice.dias_demora ? invoice.dias_demora : "-",
-        invoice.comision_tardia ? invoice.comision_tardia.toFixed(2) : "-",
-        invoice.protesto ? "Sí" : "No"
-      ]),
-      startY: 35,
-      theme: "grid", // Usar el estilo de rejilla para la tabla
-      styles: {
-        cellWidth: 'auto', // Ajustar el ancho de las celdas automáticamente
-        fontSize: 6, // Ajustar el tamaño de la fuente a 6 (más pequeño)
-        overflow: "linebreak" // Para manejar el desbordamiento de texto
-      },
-      margin: { top: 20, left: 20, right: 20 }
-    });
-    doc.text(`TCEA Promedio: ${averageTCEA}%`, 20, (doc as any).autoTable.previous.finalY + 10);  // Agregar TCEA promedio al final
-    doc.save("facturas.pdf");
-  };
+		// Color Morado
+		const purpleColor = "#5756BB"; // Color morado
 
-  if (!user) {
-    return <div>Loading usuario...</div>;
-  }
+		autoTable(doc, {
+			head: [
+				[
+					"Nombre",
+					"Fecha Emisión",
+					"Fecha Vencimiento",
+					"Importe",
+					"Moneda",
+					"Costos Adicionales",
+					"Tipo Tasa",
+					"Tiempo Tasa",
+					"Capitalización",
+					"Valor Tasa",
+					"Portes",
+					"Descuento",
+					"TCEA",
+					"Mora",
+					"Dias Mora",
+					"Comision Tardia",
+					"Protesto",
+					"Responsable",
+				],
+			],
+			body: facturas.map((invoice) => [
+				invoice.id,
+				invoice.fechaEmision,
+				invoice.fechaVencimiento,
+				invoice.importeNominal,
+				invoice.moneda,
+				invoice.costosAdicionales,
+				invoice.tipoTasa,
+				invoice.tiempoTasa,
+				invoice.capitalizacion,
+				invoice.valorTasa,
+				invoice.portes,
+				safeToFixed(invoice.descuento),
+				safeToFixed(invoice.TCEA),
+				invoice.mora ? "Sí" : "-", // Si mora es falso, muestra "-"
+				invoice.diasDemora || "-", // Si no tiene días de demora, muestra "-"
+				invoice.comisionTardia || "-", // Si no tiene comisión tardía, muestra "-"
+				invoice.protesto ? "Sí" : "-", // Si protesto es verdadero, muestra "Sí", si no "-"
+				invoice.responsable,
+			]),
+			startY: 35,
+			theme: "grid",
+			styles: {
+				cellWidth: "auto",
+				fontSize: 6,
+				overflow: "linebreak",
+			},
+			headStyles: {
+				fillColor: purpleColor, // Encabezado morado
+				textColor: "white",
+			},
+			margin: { top: 20, left: 20, right: 20 },
+		});
 
-  return (
-    <main className="w-full max-w-none mx-auto p-4 space-y-6 bg-white text-black">
-      <div className="space-y-2">
-        <h1 className="text-3xl font-semibold text-center text-gray-800">Todas las Facturas</h1>
-      </div>
+		// Calcular el TCEA promedio de las facturas mostradas
+		const totalTCEA = currentInvoices.reduce(
+			(sum, invoice) => sum + invoice.TCEA,
+			0,
+		);
+		const promedioTCEA =
+			currentInvoices.length > 0 ? totalTCEA / currentInvoices.length : 0;
 
-      <div className="flex items-center justify-between mb-4 space-x-2">
-        <input
-          type="date"
-          placeholder="Actualidad"
-          value={selectedDate}
-          onChange={handleDateChange}
-          className="border border-black p-2 rounded-md text-gray-800 ml-auto"
-        />
-      </div>
+		// Mostrar el TCEA Promedio en el PDF
+		doc.text(
+			`TCEA Promedio: ${promedioTCEA.toFixed(2)}%`,
+			20,
+			(doc as any).lastAutoTable.finalY + 10,
+		);
 
-      <div className="overflow-x-auto">
-        <table className="min-w-full text-sm text-center">
-          <thead>
-            <tr className="bg-black text-white">
-              <th className="p-4 font-medium border-b border-gray-500">Nombre</th>
-              <th className="p-4 font-medium border-b border-gray-500">Fecha Emisión</th>
-              <th className="p-4 font-medium border-b border-gray-500">Fecha Vencimiento</th>
-              <th className="p-4 font-medium border-b border-gray-500">Importe</th>
-              <th className="p-4 font-medium border-b border-gray-500">Moneda</th>
-              <th className="p-4 font-medium border-b border-gray-500">Costos Adicionales</th>
-              <th className="p-4 font-medium border-b border-gray-500">Tipo Tasa</th>
-              <th className="p-4 font-medium border-b border-gray-500">Tiempo Tasa</th>
-              <th className="p-4 font-medium border-b border-gray-500">Capitalización</th>
-              <th className="p-4 font-medium border-b border-gray-500">Valor Tasa</th>
-              <th className="p-4 font-medium border-b border-gray-500">Portes</th>
-              <th className="p-4 font-medium border-b border-gray-500">Descuento</th>
-              <th className="p-4 font-medium border-b border-gray-500">TCEA</th>
-              <th className="p-4 font-medium border-b border-gray-500">Responsable</th>
-              <th className="p-4 font-medium border-b border-gray-500">Mora</th>
-              <th className="p-4 font-medium border-b border-gray-500">Días Mora</th>
-              <th className="p-4 font-medium border-b border-gray-500">Comisión Tardía</th>
-              <th className="p-4 font-medium border-b border-gray-500">Protesto</th>
-            </tr>
-          </thead>
-          <tbody>
-            {currentInvoices.map((invoice, index) => (
-              <tr
-                key={index}
-                className={`${index % 2 === 0 ? "bg-gray-100" : "bg-white"} border-b border-gray-500`}
-              >
-                <td className="p-4">{invoice.nombre}</td>
-                <td className="p-4">{invoice.fecha_emision}</td>
-                <td className="p-4">{invoice.fecha_vencimiento}</td>
-                <td className="p-4">{invoice.importe.toFixed(2)}</td>
-                <td className="p-4">{invoice.moneda}</td>
-                <td className="p-4">
-                  {invoice.costos_adicionales.map((cost: { descripcion: string; monto: number }) => `${cost.descripcion}: ${cost.monto.toFixed(2)}`).join(", ")}
-                </td>
-                <td className="p-4">{invoice.tipo_tasa}</td>
-                <td className="p-4">{invoice.tiempo_tasa}</td>
-                <td className="p-4">{invoice.capitalizacion}</td>
-                <td className="p-4">{invoice.valor_tasa.toFixed(2)}</td>
-                <td className="p-4">{invoice.portes.toFixed(2)}</td>
-                <td className="p-4">{invoice.descuento.toFixed(2)}</td>
-                <td className="p-4">{invoice.TCEA.toFixed(2)}</td>
-                <td className="p-4">{invoice.responsable}</td>
-                <td className="p-4">{invoice.mora ? "Sí" : "No"}</td>
-                <td className="p-4">{invoice.dias_demora ? invoice.dias_demora : "-"}</td>
-                <td className="p-4">{invoice.comision_tardia ? invoice.comision_tardia.toFixed(2) : "-"}</td>
-                <td className="p-4">{invoice.protesto ? "Sí" : "No"}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+		doc.save("facturas.pdf");
+	};
 
-      <div className="flex items-center justify-between mt-4 space-x-4">
-        <div className="flex items-center">
-          <button onClick={exportToPDF} className="border border-black px-4 py-2 rounded-md text-gray-800 bg-white hover:bg-gray-100">
-            Exportar PDF
-          </button>
-        </div>
+	return (
+		<main className="w-full max-w-6xl mx-auto p-4 space-y-6">
+			<div className="flex justify-between items-center mb-4">
+				<h1 className="text-2xl font-bold text-black">Todas las Facturas</h1>
+			</div>
 
-        <div className="flex items-center space-x-4">
-          <button
-            onClick={() => paginate(currentPage - 1)}
-            className={`border border-black px-4 py-2 rounded-full ${currentPage === 1 ? "bg-gray-200" : "bg-white"} text-gray-800`}
-            disabled={currentPage === 1}
-          >
-            &lt;
-          </button>
-          
-          <button
-            onClick={() => paginate(currentPage + 1)}
-            className={`border border-black px-4 py-2 rounded-full ${currentPage === Math.ceil(filteredInvoices.length / invoicesPerPage) ? "bg-gray-200" : "bg-white"} text-gray-800`}
-            disabled={currentPage === Math.ceil(filteredInvoices.length / invoicesPerPage)}
-          >
-            &gt;
-          </button>
-        </div>
-      </div>
-    </main>
-  );
+			<div className="flex justify-between items-center mb-4 relative">
+				<div className="flex flex-col">
+					<div className="relative flex items-center">
+						<input
+							type="date"
+							value={selectedDate}
+							onChange={(e) => setSelectedDate(e.target.value)}
+							className="border border-gray-300 p-2 rounded-md"
+						/>
+						<div className="ml-2 relative group">
+							<div className="w-5 h-5 bg-[#5756BB] text-white flex items-center justify-center rounded-full text-xs font-bold cursor-pointer">
+								?
+							</div>
+							<div className="absolute top-[-40px] left-[-30px] bg-gray-800 text-white text-sm px-3 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-lg">
+								Selecciona una fecha límite para filtrar facturas.
+							</div>
+						</div>
+					</div>
+				</div>
+				<Link href="/dashboard/facturas/nueva">
+					<button
+						type="button"
+						className="bg-[#5756BB] hover:bg-[#8182DA] hover:scale-105 transition-all duration-300 text-white px-4 py-2 rounded"
+					>
+						Nueva Factura
+					</button>
+				</Link>
+			</div>
+
+			<div className="relative">
+				<Image
+					src="/cat3.png"
+					alt="Cats"
+					width={100}
+					height={100}
+					className="absolute top-[-86px] left-1/2 transform -translate-x-1/2 z-10"
+				/>
+				<FacturaTable facturas={currentInvoices} />
+			</div>
+
+			<div className="flex items-center justify-between mt-4 space-x-4">
+				<button
+					type="button"
+					onClick={exportToPDF}
+					className="border border-[#5756BB] px-4 py-2 rounded-md text-[#5756BB] bg-white hover:bg-[#5756BB] hover:text-white transition-all duration-300"
+				>
+					Exportar PDF
+				</button>
+
+				<div className="flex items-center space-x-4">
+					<button
+						type="button"
+						onClick={() => paginate(currentPage - 1)}
+						className={`border border-black px-4 py-2 rounded-full ${currentPage === 1 ? "bg-gray-200" : "bg-white"} text-gray-800`}
+						disabled={currentPage === 1}
+					>
+						&lt;
+					</button>
+
+					<button
+						type="button"
+						onClick={() => paginate(currentPage + 1)}
+						className={`border border-black px-4 py-2 rounded-full ${currentPage === Math.ceil(filteredFacturas.length / invoicesPerPage) ? "bg-gray-200" : "bg-white"} text-gray-800`}
+						disabled={
+							currentPage ===
+							Math.ceil(filteredFacturas.length / invoicesPerPage)
+						}
+					>
+						&gt;
+					</button>
+				</div>
+			</div>
+		</main>
+	);
 }

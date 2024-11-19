@@ -1,7 +1,14 @@
 import { createBrowserClient } from "@supabase/ssr";
 
-export const createClient = () =>
-  createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL as string,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string
-  );
+const supabaseUrl =
+	process.env.NEXT_PUBLIC_SUPABASE_URL ||
+	(() => {
+		throw new Error("NEXT_PUBLIC_SUPABASE_URL is not defined");
+	})();
+const supabaseKey =
+	process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+	(() => {
+		throw new Error("NEXT_PUBLIC_SUPABASE_ANON_KEY is not defined");
+	})();
+
+export const supabase = createBrowserClient(supabaseUrl, supabaseKey);

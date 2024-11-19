@@ -7,8 +7,8 @@ import { redirect } from "next/navigation";
 
 // biome-ignore lint/suspicious/noExplicitAny: <explanation>
 export async function signUpAction(formData: FormData): Promise<any> {
-  const supabase = createClient();
-  const origin = headers().get("origin");
+  const supabase = await createClient();
+  const origin = (await headers()).get("origin");
 
   const email = formData.get("email")?.toString();
   const password = formData.get("password")?.toString();
@@ -20,19 +20,20 @@ export async function signUpAction(formData: FormData): Promise<any> {
   const ruc = formData.get("ruc")?.toString();
   const currency = formData.get("currency")?.toString();
 
-
   if (!email || !password) {
     return { error: "Email and password are required" };
   }
 
   try {
-    const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: `${origin}/auth/callback`,
+    const { data: signUpData, error: signUpError } = await supabase.auth.signUp(
+      {
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${origin}/auth/callback`,
+        },
       },
-    });
+    );
 
     if (signUpError) throw new Error(signUpError.message);
 
@@ -41,18 +42,20 @@ export async function signUpAction(formData: FormData): Promise<any> {
       throw new Error("User ID not found after sign up");
     }
 
-    const { data: profileData, error: profileError } = await supabase.from("profiles").insert([
-      {
-        user_id: user_id,
-        first_name: firstName,
-        last_name: lastName,
-        dni: dni,
-        phone: phone,
-        address: address,
-        ruc: ruc,
-        currency: currency,
-      },
-    ]);
+    const { data: profileData, error: profileError } = await supabase
+      .from("profiles")
+      .insert([
+        {
+          user_id: user_id,
+          first_name: firstName,
+          last_name: lastName,
+          dni: dni,
+          phone: phone,
+          address: address,
+          ruc: ruc,
+          currency: currency,
+        },
+      ]);
 
     if (profileError) throw new Error(profileError.message);
 
@@ -66,13 +69,59 @@ export async function signUpAction(formData: FormData): Promise<any> {
   } catch (error: any) {
     return encodedRedirect("error", "/sign-up", error.message);
   }
-};
+}
 
+export async function saveInvoice(factura: any): Promise<any> {
+  console.log("formData", factura);
+  const supabase = await createClient();
+  const facturaData = factura;
+  try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    const user_id = user?.id || "unknown";
+    console.log("user", user);
+
+    const invoice_to_save = {
+      idFactura: facturaData.id,
+      fechaEmision: facturaData.fechaEmision,
+      fechaVencimiento: facturaData.fechaVencimiento,
+      plazoDescuento: parseInt(facturaData.plazoDescuento || "0"),
+      importeNominal: facturaData.importeNominal,
+      moneda: facturaData.moneda,
+      tipoTasa: facturaData.tipoTasa,
+      tiempoTasa: facturaData.tiempoTasa,
+      capitalizacion: facturaData.capitalizacion,
+      valorTasa: parseInt(facturaData.valorTasa || "0"),
+      costosAdicionales: facturaData.costosAdicionales.reduce((acc: number, costo: any) => {
+        return acc + parseFloat(costo.monto);
+      }, 0),
+      costosMora: facturaData.costosMora.reduce((acc: number, costo: any) => {
+        return acc + parseFloat(costo.monto);
+      }, 0),
+      portes: parseInt(facturaData.portes || "0"),
+      retencion: parseInt(facturaData.retencion || "0"),
+      tipoTasaMora: facturaData.tipoTasaMora,
+      tiempoTasaMora: facturaData.tiempoTasaMora,
+      capitalizacionMora: facturaData.capitalizacionMora,
+      valorTasaMora: facturaData.valorTasaMora,
+      diasMora: parseInt(facturaData.diasMora || "0"),
+      conMora: facturaData.conMora,
+      tcea: facturaData.tcea,
+      user_id: user_id, // Aquí se asegura que el valor esté disponible
+    };
+
+    console.log("invoice_to_save", invoice_to_save);
+    await supabase.from("documents").insert([invoice_to_save]);
+  } catch (err) {
+    console.error("Error inesperado:", err);
+  }
+}
 
 export const signInAction = async (formData: FormData) => {
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { error } = await supabase.auth.signInWithPassword({
     email,
@@ -88,8 +137,8 @@ export const signInAction = async (formData: FormData) => {
 
 export const forgotPasswordAction = async (formData: FormData) => {
   const email = formData.get("email")?.toString();
-  const supabase = createClient();
-  const origin = headers().get("origin");
+  const supabase = await createClient();
+  const origin = (await headers()).get("origin");
   const callbackUrl = formData.get("callbackUrl")?.toString();
 
   if (!email) {
@@ -120,7 +169,7 @@ export const forgotPasswordAction = async (formData: FormData) => {
 };
 
 export const resetPasswordAction = async (formData: FormData) => {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const password = formData.get("password") as string;
   const confirmPassword = formData.get("confirmPassword") as string;
@@ -134,11 +183,7 @@ export const resetPasswordAction = async (formData: FormData) => {
   }
 
   if (password !== confirmPassword) {
-    encodedRedirect(
-      "error",
-      "/reset-password",
-      "Passwords do not match",
-    );
+    encodedRedirect("error", "/reset-password", "Passwords do not match");
   }
 
   const { error } = await supabase.auth.updateUser({
@@ -146,18 +191,14 @@ export const resetPasswordAction = async (formData: FormData) => {
   });
 
   if (error) {
-    encodedRedirect(
-      "error",
-      "/reset-password",
-      "Password update failed",
-    );
+    encodedRedirect("error", "/reset-password", "Password update failed");
   }
 
   encodedRedirect("success", "/reset-password", "Password updated");
 };
 
 export const signOutAction = async () => {
-  const supabase = createClient();
+  const supabase = await createClient();
   await supabase.auth.signOut();
   return redirect("/sign-in");
 };
