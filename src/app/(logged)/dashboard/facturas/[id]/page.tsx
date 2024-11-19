@@ -94,22 +94,19 @@ export default function FacturaDetailsPage() {
 						<p className="font-semibold text-[#5756BB]">Portes:</p>
 						<p>{invoice.portes}</p>
 					</div>
-					<div>
+					{/*<div>
 						<p className="font-semibold text-[#5756BB]">Descuento:</p>
 						<p>{invoice.descuento}</p>
-					</div>
+					</div> */}
 					<div>
 						<p className="font-semibold text-[#5756BB]">TCEA:</p>
-						<p>{invoice.TCEA}%</p>
-					</div>
-					<div>
-						<p className="font-semibold text-[#5756BB]">Responsable:</p>
-						<p>{invoice.responsable}</p>
+						<p>{Number.parseFloat(invoice.tcea).toFixed(2)}%</p>
 					</div>
 				</div>
 			</div>
 
 			<button
+				type="button"
 				onClick={() => router.back()}
 				className="mt-6 bg-[#5756BB] text-white px-6 py-3 rounded-md shadow-md hover:bg-[#8182DA] hover:scale-105 transition-all"
 			>
