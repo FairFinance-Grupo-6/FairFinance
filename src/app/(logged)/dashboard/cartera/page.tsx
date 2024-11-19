@@ -1,11 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/utils/supabase/client";
 import { useTheme } from "next-themes";
 import Image from "next/image";
 import cat6 from "@/public/cat6.png";
-import { clear } from "console";
 
 export default function BriefcasesPage() {
 	const { theme, setTheme, systemTheme } = useTheme();
@@ -36,9 +35,9 @@ export default function BriefcasesPage() {
 		};
 	};
 
-	const applyFilters = () => {
+	const applyFilters = useCallback(() => {
 		const { fechaEmision, fechaVencimiento, responsable } = filters;
-		const filtered = filteredInvoices.filter((invoice) => {
+		const filtered = invoices.filter((invoice) => {
 			return (
 				(fechaEmision ? invoice.fechaEmision === fechaEmision : true) &&
 				(fechaVencimiento
@@ -52,7 +51,7 @@ export default function BriefcasesPage() {
 			);
 		});
 		setFilteredInvoices(filtered);
-	};
+	}, [filters, invoices]);
 
 	useEffect(() => {
 		supabase.auth.getUser().then(({ data }) => {
@@ -89,7 +88,7 @@ export default function BriefcasesPage() {
 			fechaVencimiento: "",
 			responsable: "",
 		});
-		setFilteredInvoices(filteredInvoices);
+		setFilteredInvoices(invoices);
 	}
 
 	return (
@@ -202,7 +201,7 @@ export default function BriefcasesPage() {
 				<div className="space-y-2">
 					<h2 className="text-lg font-bold">Facturas Filtradas</h2>
 					<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-						{filteredInvoices.map((invoice) => (
+						{filteredInvoices.map((invoice: any) => (
 							<div
 								key={invoice.id}
 								className="p-4 bg-gray-100 dark:bg-gray-800 rounded-lg shadow-md"
