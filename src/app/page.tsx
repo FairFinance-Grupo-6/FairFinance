@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import React, { useState, useEffect } from "react";
 
 export default function Index() {
@@ -16,19 +16,19 @@ export default function Index() {
     {
       title: "Servicios",
       description:
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla accumsan orci eu orci laciniaxxxxxxx.",
+        "Explora nuestros servicios diseñados para ofrecerte soluciones integrales, eficientes y permanentes.",
       button1Text: "Explorar",
       button2Text: "Leer más",
-      imageSrc: "/faircat.png",
+      imageSrc: "/faircat2.png",
       bgColor: "bg-gradient-to-r from-blue-700 via-blue-500 to-blue-700",
     },
     {
       title: "Contacto",
       description:
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent liberoooooooooo.",
+        "Establece contacto con nosotros para explorar soluciones efectivas que impulsen el crecimiento.",
       button1Text: "Enviar mensaje",
       button2Text: "Llamar",
-      imageSrc: "/faircat.png",
+      imageSrc: "/faircat3.png",
       bgColor: "bg-gradient-to-r from-yellow-700 via-yellow-500 to-yellow-700",
     },
   ];
@@ -41,6 +41,11 @@ export default function Index() {
     return () => clearInterval(interval); // Limpiar intervalo al desmontar el componente
   }, []);
 
+  // Función para manejar el clic del botón "Regístrate ahora"
+  const handleRegisterClick = () => {
+    window.location.href = "/sign-in"; // Reemplaza con la ruta deseada
+  };
+
   return (
     <>
       <main className="flex-1 flex flex-col items-center bg-white">
@@ -52,9 +57,14 @@ export default function Index() {
             <h1 className="text-4xl font-bold">{sections[currentSection].title}</h1>
             <p className="text-lg">{sections[currentSection].description}</p>
             <div className="flex gap-4">
-              <button className="bg-purple-600 hover:bg-purple-800 text-white px-6 py-3 rounded-lg shadow-md transition-all duration-300 ease-in-out">
-                {sections[currentSection].button1Text}
-              </button>
+              {currentSection === 0 && (
+                <button
+                  className="bg-purple-600 hover:bg-purple-800 text-white px-6 py-3 rounded-lg shadow-md transition-all duration-300 ease-in-out"
+                  onClick={handleRegisterClick} // Asociar la acción
+                >
+                  {sections[currentSection].button1Text}
+                </button>
+              )}
               <button className="border border-white hover:bg-white hover:text-purple-700 text-white px-6 py-3 rounded-lg shadow-md transition-all duration-300 ease-in-out">
                 {sections[currentSection].button2Text}
               </button>
@@ -68,16 +78,16 @@ export default function Index() {
             />
           </div>
           <div className="absolute bottom-8 right-8 flex gap-2">
-          {sections.map((_, index) => (
-            <div
-              key={index}
-              className={`w-3 h-3 rounded-full bg-white cursor-pointer ${
-                currentSection === index ? "opacity-80" : "opacity-50"
-              }`}
-              onClick={() => setCurrentSection(index)}
-            />
-          ))}
-        </div>
+            {sections.map((_, index) => (
+              <div
+                key={index}
+                className={`w-3 h-3 rounded-full bg-white cursor-pointer ${
+                  currentSection === index ? "opacity-80" : "opacity-50"
+                }`}
+                onClick={() => setCurrentSection(index)}
+              />
+            ))}
+          </div>
         </section>
       </main>
     </>
