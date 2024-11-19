@@ -40,7 +40,7 @@ export function DropMyAccount({ user }: { user: User }) {
 							variant="outline"
 							className="w-full text-left"
 						>
-							Sign out
+							Cerrar sesión
 						</Button>
 					</form>
 				</div>
