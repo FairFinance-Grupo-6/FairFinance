@@ -15,7 +15,6 @@ export default function BriefcasesPage() {
 	const [filters, setFilters] = useState({
 		fechaEmision: "",
 		fechaVencimiento: "",
-		responsable: "",
 	});
 
 	const calculateAverages = () => {
@@ -36,17 +35,12 @@ export default function BriefcasesPage() {
 	};
 
 	const applyFilters = useCallback(() => {
-		const { fechaEmision, fechaVencimiento, responsable } = filters;
+		const { fechaEmision, fechaVencimiento } = filters;
 		const filtered = invoices.filter((invoice) => {
 			return (
 				(fechaEmision ? invoice.fechaEmision === fechaEmision : true) &&
 				(fechaVencimiento
 					? invoice.fechaVencimiento === fechaVencimiento
-					: true) &&
-				(responsable
-					? invoice.responsable
-							.toLowerCase()
-							.includes(responsable.toLowerCase())
 					: true)
 			);
 		});
@@ -117,9 +111,9 @@ export default function BriefcasesPage() {
 					/>
 				</div>
 
-				<div className="bg-purple-100 dark:bg-gray-800 p-4 rounded-lg shadow-lg">
+				<div className="bg-purple-100 dark:bg-gray-800 p-4 rounded-lg shadow-lg center">
 					<h2 className="text-lg font-bold">Filtros</h2>
-					<div className="grid grid-cols-3 gap-4">
+					<div className="grid grid-cols-3 gap-4 mt-4 justify-center items-center">
 						<div>
 							<label
 								className="block text-sm font-medium"
@@ -155,27 +149,6 @@ export default function BriefcasesPage() {
 									setFilters((prev) => ({
 										...prev,
 										fechaVencimiento: e.target.value,
-									}))
-								}
-							/>
-						</div>
-						<div>
-							<label
-								className="block text-sm font-medium"
-								htmlFor="responsable"
-							>
-								Responsable
-							</label>
-							<input
-								id="responsable"
-								type="text"
-								className="w-full p-2 border rounded-lg"
-								placeholder="Ej. Juan Pérez"
-								value={filters.responsable}
-								onChange={(e) =>
-									setFilters((prev) => ({
-										...prev,
-										responsable: e.target.value,
 									}))
 								}
 							/>
