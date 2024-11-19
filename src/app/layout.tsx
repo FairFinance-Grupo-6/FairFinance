@@ -40,7 +40,7 @@ export default async function RootLayout({
                   <div className="flex gap-5 items-center font-semibold">
                     <Link href={"/"} className="hover:text-[#5756BB] transition duration-200 ease-in-out">Fair Finance</Link>
                     <Link href={"/dashboard/facturas"} className="hover:text-[#5756BB] transition duration-200 ease-in-out">Facturas</Link>
-                    <Link href={"/dashboard/cartera"} className="hover:text-[#5756BB] transition duration-200 ease-in-out">Carteras</Link>
+                    <Link href={"/dashboard/cartera"} className="hover:text-[#5756BB] transition duration-200 ease-in-out">Cartera</Link>
                   </div>
                   <div className="flex gap-5 items-center">
                     <Suspense fallback={<AuthButtonSkeleton />}>
