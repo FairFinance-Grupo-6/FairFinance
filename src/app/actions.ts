@@ -108,7 +108,8 @@ export async function saveInvoice(factura: any): Promise<any> {
       diasMora: parseInt(facturaData.diasMora || "0"),
       conMora: facturaData.conMora,
       tcea: facturaData.tcea,
-      user_id: user_id, // Aquí se asegura que el valor esté disponible
+      descuento: facturaData.descuento,
+      user_id: user_id, 
     };
 
     console.log("invoice_to_save", invoice_to_save);
