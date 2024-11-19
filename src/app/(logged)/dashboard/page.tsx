@@ -6,7 +6,7 @@ import { Clock } from "lucide-react";
 import { useTheme } from "next-themes";
 import Link from "next/link";
 import Image from "next/image";
-import cat1 from "@/public/cat1.png"; 
+import cat1 from "@/public/cat1.png";
 import mockInvoices from "@/app/data/invoices.json"; // Importa el archivo de facturas
 import { supabase } from "@/utils/supabase/client";
 
@@ -25,7 +25,6 @@ export default function Dashboard() {
       supabase.auth.getUser().then(({ data }) => {
         mockUser.email = data.user?.email || "";
         mockUser.name = data.user?.email?.split("@")[0] || "";
-
         setUser(mockUser);
       });
     };
@@ -76,10 +75,10 @@ export default function Dashboard() {
             Estas son tus facturas registradas
           </span>
         </div>
-        
+
         <div className="flex flex-col items-center justify-center">
-          <Image 
-            src="/cat1.png" 
+          <Image
+            src="/cat1.png"
             alt="Imagen de saludo"
             width={110}
             height={110}
@@ -116,7 +115,7 @@ export default function Dashboard() {
 
 
 
-     <div className="space-y-2">
+      <div className="space-y-2">
         <div className="flex justify-left gap-4"> {/* Esto coloca los botones centrados con espacio entre ellos */}
           <Button className={`w-auto ${styles.buttonBg} text-white ${styles.buttonHover}`}>
             <Link href="/dashboard/facturas/nueva">Agregar Factura</Link>
