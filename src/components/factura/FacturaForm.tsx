@@ -1,7 +1,13 @@
+// FacturaForm.tsx
+
 "use client";
 
-import { FaTrashAlt } from "react-icons/fa";
 import { useFactura } from "@/app/hooks/useFactura";
+import { useRouter } from "next/navigation";
+import { toast, ToastContainer } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
+
+
 
 import { FacturaInfoSection } from "../FacturaForm/FacturaInfoSection";
 import { FacturaCostosSection } from "../FacturaForm/FacturaCostosSection";
@@ -10,14 +16,11 @@ import { FacturaMoraSection } from "../FacturaForm/FacturaMoraSection";
 import { FacturaResultadoSection } from "../FacturaForm/FacturaResultado";
 import { saveInvoice } from "@/app/actions";
 
-interface FacturaFormProps {
-  onSave: (facturaData: any) => void;
-}
-
 export default function FacturaForm() {
   const {
     factura,
     tcea,
+    descuento,
     isTceaCalculated,
     handleInputChangeMora,
     handleInputChange,
@@ -28,46 +31,70 @@ export default function FacturaForm() {
     removeCostoMora,
   } = useFactura();
 
-  const handleSaveInvoice = () => {
-    const factura_to_save = {
-      ...factura,
-      tcea: tcea
+  const router = useRouter();
+
+  const handleSaveInvoice = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    try {
+      const factura_to_save = {
+        ...factura,
+        tcea: tcea,
+        descuento: descuento,
+      };
+      await saveInvoice(factura_to_save);
+      toast.success("Factura guardada correctamente.", {
+        position: "top-right",
+      });
+      // Redirigir después de un breve retraso para mostrar el mensaje
+      setTimeout(() => {
+        router.push("/dashboard/facturas"); // Ajusta esta ruta a tu página de lista de facturas
+      }, 2000);
+    } catch (error) {
+      console.error("Error al guardar la factura:", error);
+      toast.error("Error al guardar la factura.", {
+        position: "top-right",
+      });
     }
-    saveInvoice(factura_to_save);
-  }
+  };
 
   return (
-    <form onSubmit={handleSaveInvoice} className="space-y-6">
-      <FacturaInfoSection
-        factura={factura}
-        handleInputChange={handleInputChange}
-      />
+    <>
+      <form onSubmit={handleSaveInvoice} className="space-y-6">
+        <FacturaInfoSection
+          factura={factura}
+          handleInputChange={handleInputChange}
+        />
 
-      <FacturaCostosSection
-        factura={factura}
-        handleInputChange={handleInputChange}
-        addCosto={addCosto}
-        removeCosto={removeCosto}
-      />
+        <FacturaCostosSection
+          factura={factura}
+          handleInputChange={handleInputChange}
+          addCosto={addCosto}
+          removeCosto={removeCosto}
+        />
 
-      <FacturaTasasSection
-        factura={factura}
-        handleInputChange={handleInputChange}
-      />
+        <FacturaTasasSection
+          factura={factura}
+          handleInputChange={handleInputChange}
+        />
 
-      <FacturaMoraSection
-        factura={factura}
-        handleInputChange={handleInputChange}
-        handleInputChangeMora={handleInputChangeMora}
-        addCostoMora={addCostoMora}
-        removeCostoMora={removeCostoMora}
-      />
+        <FacturaMoraSection
+          factura={factura}
+          handleInputChange={handleInputChange}
+          handleInputChangeMora={handleInputChangeMora}
+          addCostoMora={addCostoMora}
+          removeCostoMora={removeCostoMora}
+        />
 
-      <FacturaResultadoSection
-        tcea={tcea}
-        isTceaCalculated={isTceaCalculated}
-        handleCalculateTcea={handleCalculateTcea}
-      />
-    </form>
+        <FacturaResultadoSection
+          tcea={tcea}
+          descuento={descuento}
+          moneda={factura.moneda}
+          isTceaCalculated={isTceaCalculated}
+          handleCalculateTcea={handleCalculateTcea}
+        />
+      </form>
+      <ToastContainer />
+    </>
   );
 }
