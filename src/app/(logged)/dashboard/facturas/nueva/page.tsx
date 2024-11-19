@@ -1,10 +1,12 @@
 "use client";
 import { saveInvoice } from "@/app/actions";
 import FacturaForm from "@/components/factura/FacturaForm";
+import Image from "next/image";
+import cat2 from "@/public/cat2.png"; 
 import { supabase } from "@/utils/supabase/client";
 
 export default function NuevaFactura() {
-
+  
   const handleSaveFactura = async (facturaData: any) => {
     try {
       const {

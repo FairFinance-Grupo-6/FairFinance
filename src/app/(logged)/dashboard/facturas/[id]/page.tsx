@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import mockInvoices from "@/app/data/invoices.json";
+import Image from "next/image"; 
 
 export default function FacturaDetailsPage() {
   const { id } = useParams();
@@ -14,7 +15,7 @@ export default function FacturaDetailsPage() {
     const fetchInvoice = async () => {
       const invoiceId = Number(id);
       const mockInvoice = mockInvoices.find(
-        (invoice) => invoice.id === invoiceId,
+        (invoice) => invoice.id === invoiceId
       );
 
       if (mockInvoice) {
@@ -31,9 +32,19 @@ export default function FacturaDetailsPage() {
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
-      <h1 className="text-3xl font-extrabold text-[#5756BB] mb-6 text-center">
-        Factura #{invoice.id}
-      </h1>
+      {/* Contenedor flex para alinear imagen a la izquierda y título a la derecha */}
+      <div className="flex items-center mb-6">
+        <Image
+          src="/cat4.png" // Ruta de la imagen
+          alt="Imagen de gato"
+          width={120} // Ancho de la imagen
+          height={120} // Alto de la imagen
+          className="mr-4" // Espacio entre la imagen y el título
+        />
+        <h1 className="text-3xl font-extrabold text-[#5756BB]">
+          Factura #{invoice.id}
+        </h1>
+      </div>
 
       <div className="bg-[#F8F8FF] shadow-md rounded-lg p-6">
         <div className="grid grid-cols-2 gap-4 text-lg">
@@ -99,4 +110,3 @@ export default function FacturaDetailsPage() {
     </div>
   );
 }
-

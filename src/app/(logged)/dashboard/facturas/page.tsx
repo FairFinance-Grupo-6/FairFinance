@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { FacturaTable } from "@/components/factura/FacturaTable";
 import Link from "next/link";
+import Image from "next/image";
+import cat3 from "@/public/cat2.png"; 
 import mockInvoices from "@/app/data/invoices.json";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -163,6 +165,7 @@ export default function FacturasPage() {
   
 
   return (
+
     <main className="w-full max-w-6xl mx-auto p-4 space-y-6">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold text-black">Todas las Facturas</h1>
@@ -194,8 +197,18 @@ export default function FacturasPage() {
         </Link>
       </div>
 
+      <div className="relative">
+  <Image 
+    src="/cat3.png" 
+    alt="Cats"
+    width={100}
+    height={100}
+    className="absolute top-[-86px] left-1/2 transform -translate-x-1/2 z-10"
+  />
+  <FacturaTable facturas={currentInvoices} />
+</div>
 
-      <FacturaTable facturas={currentInvoices} />
+
 
       <div className="flex items-center justify-between mt-4 space-x-4">
         <button

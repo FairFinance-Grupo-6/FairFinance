@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Clock } from "lucide-react";
 import { useTheme } from "next-themes";
 import Link from "next/link";
+import Image from "next/image";
+import cat1 from "@/public/cat1.png"; 
 import mockInvoices from "@/app/data/invoices.json"; // Importa el archivo de facturas
 import { supabase } from "@/utils/supabase/client";
 
@@ -75,14 +77,24 @@ export default function Dashboard() {
           </span>
         </div>
         
-        <button
-          className={`flex items-center justify-between ${styles.buttonBg} p-3 pl-4 pr-20 text-white rounded ${styles.buttonHover}`}
-        >
-          <Clock className="mr-2 h-4 w-4" />
-          <Link href="/dashboard/facturas">
-            <p className="w-36">Ver Todas</p>
-          </Link>
-        </button>
+        <div className="flex flex-col items-center justify-center">
+          <Image 
+            src="/cat1.png" 
+            alt="Imagen de saludo"
+            width={110}
+            height={110}
+          />
+
+          <button
+            className={`flex items-center justify-between ${styles.buttonBg} p-3 pl-4 pr-20 text-white rounded ${styles.buttonHover}`}
+          >
+            <Clock className="mr-2 h-4 w-4" />
+            <Link href="/dashboard/facturas">
+              <p className="w-36">Ver Todas</p>
+            </Link>
+          </button>
+        </div>
+
       </div>
 
 
