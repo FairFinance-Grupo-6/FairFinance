@@ -21,12 +21,16 @@ export default function BriefcasesPage() {
 		const totalFacturas = filteredInvoices.length;
 
 		const promedioDescuento =
-			filteredInvoices.reduce((sum, invoice) => sum + invoice.descuento, 0) /
-			totalFacturas;
+			filteredInvoices.reduce(
+				(sum: any, invoice: any) => sum + invoice.descuento,
+				0,
+			) / totalFacturas;
 
 		const promedioTCEA =
-			filteredInvoices.reduce((sum, invoice) => sum + invoice.TCEA, 0) /
-			totalFacturas;
+			filteredInvoices.reduce(
+				(sum: any, invoice: any) => sum + invoice.TCEA,
+				0,
+			) / totalFacturas;
 
 		return {
 			promedioDescuento: promedioDescuento.toFixed(2),
@@ -80,7 +84,6 @@ export default function BriefcasesPage() {
 		setFilters({
 			fechaEmision: "",
 			fechaVencimiento: "",
-			responsable: "",
 		});
 		setFilteredInvoices(invoices);
 	}
@@ -183,17 +186,11 @@ export default function BriefcasesPage() {
 									<strong>ID:</strong> {invoice.id}
 								</p>
 								<p>
-									<strong>Responsable:</strong> {invoice.responsable}
-								</p>
-								<p>
 									<strong>Fecha de Emisión:</strong> {invoice.fechaEmision}
 								</p>
 								<p>
 									<strong>Fecha de Vencimiento:</strong>{" "}
 									{invoice.fechaVencimiento}
-								</p>
-								<p>
-									<strong>Descuento:</strong> {invoice.descuento}
 								</p>
 								<p>
 									<strong>TCEA:</strong> {invoice.TCEA}%
