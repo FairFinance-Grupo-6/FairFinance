@@ -31,7 +31,7 @@ interface Factura {
 	valorTasa: string;
 	costosAdicionales: number;
 	portes: string;
-	TCEA: number;
+	tcea: number;
 	descuento: number;
 	mora: boolean;
 	diasDemora: number;
@@ -145,7 +145,7 @@ export default function FacturasPage() {
 				invoice.valorTasa,
 				invoice.portes,
 				safeToFixed(invoice.descuento),
-				safeToFixed(invoice.TCEA),
+				safeToFixed(invoice.tcea),
 				invoice.mora ? "Sí" : "-", // Si mora es falso, muestra "-"
 				invoice.diasDemora || "-", // Si no tiene días de demora, muestra "-"
 				invoice.comisionTardia || "-", // Si no tiene comisión tardía, muestra "-"
@@ -168,7 +168,7 @@ export default function FacturasPage() {
 
 		// Calcular el TCEA promedio de las facturas mostradas
 		const totalTCEA = currentInvoices.reduce(
-			(sum, invoice) => sum + invoice.TCEA,
+			(sum, invoice) => sum + invoice.tcea,
 			0,
 		);
 		const promedioTCEA =
