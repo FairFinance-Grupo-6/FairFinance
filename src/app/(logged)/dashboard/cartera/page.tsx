@@ -5,176 +5,232 @@ import { supabase } from "@/utils/supabase/client";
 import { useTheme } from "next-themes";
 import Image from "next/image";
 import cat6 from "@/public/cat6.png";
-import mockInvoices from "@/app/data/invoices.json";
+import { clear } from "console";
 
 export default function BriefcasesPage() {
-  const { theme, setTheme, systemTheme } = useTheme();
-  const [user, setUser] = useState<any>(null);
+	const { theme, setTheme, systemTheme } = useTheme();
+	const [user, setUser] = useState<any>(null);
+	const [invoices, setInvoices] = useState<any[]>([]);
 
-  const [filteredInvoices, setFilteredInvoices] = useState(mockInvoices);
-  const [filters, setFilters] = useState({
-    fechaEmision: "",
-    fechaVencimiento: "",
-    responsable: "",
-  });
+	const [filteredInvoices, setFilteredInvoices] = useState<any>([]);
+	const [filters, setFilters] = useState({
+		fechaEmision: "",
+		fechaVencimiento: "",
+		responsable: "",
+	});
 
-  const calculateAverages = () => {
-    const totalFacturas = filteredInvoices.length;
+	const calculateAverages = () => {
+		const totalFacturas = filteredInvoices.length;
 
-    const promedioDescuento =
-      filteredInvoices.reduce((sum, invoice) => sum + invoice.descuento, 0) /
-      totalFacturas;
+		const promedioDescuento =
+			filteredInvoices.reduce((sum, invoice) => sum + invoice.descuento, 0) /
+			totalFacturas;
 
-    const promedioTCEA =
-      filteredInvoices.reduce((sum, invoice) => sum + invoice.TCEA, 0) /
-      totalFacturas;
+		const promedioTCEA =
+			filteredInvoices.reduce((sum, invoice) => sum + invoice.TCEA, 0) /
+			totalFacturas;
 
-    return {
-      promedioDescuento: promedioDescuento.toFixed(2),
-      promedioTCEA: promedioTCEA.toFixed(2),
-    };
-  };
+		return {
+			promedioDescuento: promedioDescuento.toFixed(2),
+			promedioTCEA: promedioTCEA.toFixed(2),
+		};
+	};
 
-  const applyFilters = () => {
-    const { fechaEmision, fechaVencimiento, responsable } = filters;
-    const filtered = mockInvoices.filter((invoice) => {
-      return (
-        (fechaEmision ? invoice.fechaEmision === fechaEmision : true) &&
-        (fechaVencimiento ? invoice.fechaVencimiento === fechaVencimiento : true) &&
-        (responsable
-          ? invoice.responsable.toLowerCase().includes(responsable.toLowerCase())
-          : true)
-      );
-    });
-    setFilteredInvoices(filtered);
-  };
+	const applyFilters = () => {
+		const { fechaEmision, fechaVencimiento, responsable } = filters;
+		const filtered = filteredInvoices.filter((invoice) => {
+			return (
+				(fechaEmision ? invoice.fechaEmision === fechaEmision : true) &&
+				(fechaVencimiento
+					? invoice.fechaVencimiento === fechaVencimiento
+					: true) &&
+				(responsable
+					? invoice.responsable
+							.toLowerCase()
+							.includes(responsable.toLowerCase())
+					: true)
+			);
+		});
+		setFilteredInvoices(filtered);
+	};
 
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      setUser({
-        email: data.user?.email || "",
-        name: data.user?.email?.split("@")[0] || "",
-      });
-    });
-  }, []);
+	useEffect(() => {
+		supabase.auth.getUser().then(({ data }) => {
+			setUser({
+				email: data.user?.email || "",
+				name: data.user?.email?.split("@")[0] || "",
+			});
+			supabase
+				.from("documents")
+				.select("*")
+				.eq("user_id", data.user?.id)
+				.then(({ data, error }) => {
+					if (error) {
+						console.error(error);
+					} else {
+						setInvoices(data);
+						setFilteredInvoices(data);
+					}
+				});
+		});
+	}, []);
 
-  const currentTheme = theme === "system" ? systemTheme : theme;
+	const currentTheme = theme === "system" ? systemTheme : theme;
 
-  if (!user) {
-    return <div>Loading...</div>;
-  }
+	if (!user) {
+		return <div>Loading...</div>;
+	}
 
-  const { promedioDescuento, promedioTCEA } = calculateAverages();
+	const { promedioDescuento, promedioTCEA } = calculateAverages();
 
-  return (
-    <main
-      className={`w-full max-w-3xl mx-auto p-4 space-y-6 ${
-        currentTheme === "dark" ? "bg-gray-900 text-white" : "bg-white text-black"
-      }`}
-    >
-      <div className="space-y-4">
-        <h1 className="text-2xl font-semibold">
-          Hola, {user.name}! Esta es la cartera
-        </h1>
+	function clearFilters() {
+		setFilters({
+			fechaEmision: "",
+			fechaVencimiento: "",
+			responsable: "",
+		});
+		setFilteredInvoices(filteredInvoices);
+	}
 
-        <div className="flex flex-col space-y-4 bg-purple-100 dark:bg-purple-800 p-4 rounded-lg shadow-lg relative">
-          <h2 className="text-lg font-bold">Promedios</h2>
-          <p>Promedio de Descuento: {promedioDescuento}</p>
-          <p>Promedio de TCEA: {promedioTCEA}%</p>
-          <Image 
-            src="/cat6.png" 
-            alt="Cats"
-            width={120}
-            height={120}
-            className="absolute top-2 right-4 transform z-10"
-          />
-        </div>
+	return (
+		<main
+			className={`w-full max-w-3xl mx-auto p-4 space-y-6 ${
+				currentTheme === "dark"
+					? "bg-gray-900 text-white"
+					: "bg-white text-black"
+			}`}
+		>
+			<div className="space-y-4">
+				<h1 className="text-2xl font-semibold">
+					Hola, {user.name}! Esta es la cartera
+				</h1>
 
-        <div className="bg-purple-100 dark:bg-gray-800 p-4 rounded-lg shadow-lg">
-          <h2 className="text-lg font-bold">Filtros</h2>
-          <div className="grid grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm font-medium">
-                Fecha de Emisión
-              </label>
-              <input
-                type="date"
-                className="w-full p-2 border rounded-lg"
-                value={filters.fechaEmision}
-                onChange={(e) =>
-                  setFilters((prev) => ({ ...prev, fechaEmision: e.target.value }))
-                }
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium">
-                Fecha de Vencimiento
-              </label>
-              <input
-                type="date"
-                className="w-full p-2 border rounded-lg"
-                value={filters.fechaVencimiento}
-                onChange={(e) =>
-                  setFilters((prev) => ({
-                    ...prev,
-                    fechaVencimiento: e.target.value,
-                  }))
-                }
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium">Responsable</label>
-              <input
-                type="text"
-                className="w-full p-2 border rounded-lg"
-                placeholder="Ej. Juan Pérez"
-                value={filters.responsable}
-                onChange={(e) =>
-                  setFilters((prev) => ({ ...prev, responsable: e.target.value }))
-                }
-              />
-            </div>
-          </div>
-          <button
-            className="mt-4 w-full bg-[#5756BB] hover:bg-[#8182DA] hover:scale-105 transition-all duration-300 py-3 rounded-md text-white p-2 rounded-lg"
-            onClick={applyFilters}
-          >
-            Aplicar Filtros
-          </button>
-        </div>
+				<div className="flex flex-col space-y-4 bg-purple-100 dark:bg-purple-800 p-4 rounded-lg shadow-lg relative">
+					<h2 className="text-lg font-bold">Promedios</h2>
+					<p>Promedio de Descuento: {promedioDescuento}</p>
+					<p>Promedio de TCEA: {promedioTCEA}%</p>
+					<Image
+						src="/cat6.png"
+						alt="Cats"
+						width={120}
+						height={120}
+						className="absolute top-2 right-4 transform z-10"
+					/>
+				</div>
 
-        <div className="space-y-2">
-  <h2 className="text-lg font-bold">Facturas Filtradas</h2>
-  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-    {filteredInvoices.map((invoice) => (
-      <div
-        key={invoice.id}
-        className="p-4 bg-gray-100 dark:bg-gray-800 rounded-lg shadow-md"
-      >
-        <p>
-          <strong>ID:</strong> {invoice.id}
-        </p>
-        <p>
-          <strong>Responsable:</strong> {invoice.responsable}
-        </p>
-        <p>
-          <strong>Fecha de Emisión:</strong> {invoice.fechaEmision}
-        </p>
-        <p>
-          <strong>Fecha de Vencimiento:</strong> {invoice.fechaVencimiento}
-        </p>
-        <p>
-          <strong>Descuento:</strong> {invoice.descuento}
-        </p>
-        <p>
-          <strong>TCEA:</strong> {invoice.TCEA}%
-        </p>
-      </div>
-    ))}
-  </div>
-</div>
+				<div className="bg-purple-100 dark:bg-gray-800 p-4 rounded-lg shadow-lg">
+					<h2 className="text-lg font-bold">Filtros</h2>
+					<div className="grid grid-cols-3 gap-4">
+						<div>
+							<label
+								className="block text-sm font-medium"
+								htmlFor="fechaEmision"
+							>
+								Fecha de Emisión
+							</label>
+							<input
+								id="fechaEmision"
+								type="date"
+								className="w-full p-2 border rounded-lg"
+								value={filters.fechaEmision}
+								onChange={(e) =>
+									setFilters((prev) => ({
+										...prev,
+										fechaEmision: e.target.value,
+									}))
+								}
+							/>
+						</div>
+						<div>
+							<label
+								className="block text-sm font-medium"
+								htmlFor="fechaVencimiento"
+							>
+								Fecha de Vencimiento
+							</label>
+							<input
+								type="date"
+								className="w-full p-2 border rounded-lg"
+								value={filters.fechaVencimiento}
+								onChange={(e) =>
+									setFilters((prev) => ({
+										...prev,
+										fechaVencimiento: e.target.value,
+									}))
+								}
+							/>
+						</div>
+						<div>
+							<label
+								className="block text-sm font-medium"
+								htmlFor="responsable"
+							>
+								Responsable
+							</label>
+							<input
+								id="responsable"
+								type="text"
+								className="w-full p-2 border rounded-lg"
+								placeholder="Ej. Juan Pérez"
+								value={filters.responsable}
+								onChange={(e) =>
+									setFilters((prev) => ({
+										...prev,
+										responsable: e.target.value,
+									}))
+								}
+							/>
+						</div>
+					</div>
+					<button
+						type="button"
+						className="mt-4 w-full bg-[#5756BB] hover:bg-[#8182DA] hover:scale-105 transition-all duration-300 py-3 rounded-md text-white p-2 rounded-lg"
+						onClick={applyFilters}
+					>
+						Aplicar Filtros
+					</button>
 
-      </div>
-    </main>
-  );
+					<button
+						type="button"
+						className="mt-4 w-full bg-[#5756BB] hover:bg-[#8182DA] hover:scale-105 transition-all duration-300 py-3 rounded-md text-white p-2 rounded-lg"
+						onClick={clearFilters}
+					>
+						Limpiar Filtros
+					</button>
+				</div>
+
+				<div className="space-y-2">
+					<h2 className="text-lg font-bold">Facturas Filtradas</h2>
+					<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+						{filteredInvoices.map((invoice) => (
+							<div
+								key={invoice.id}
+								className="p-4 bg-gray-100 dark:bg-gray-800 rounded-lg shadow-md"
+							>
+								<p>
+									<strong>ID:</strong> {invoice.id}
+								</p>
+								<p>
+									<strong>Responsable:</strong> {invoice.responsable}
+								</p>
+								<p>
+									<strong>Fecha de Emisión:</strong> {invoice.fechaEmision}
+								</p>
+								<p>
+									<strong>Fecha de Vencimiento:</strong>{" "}
+									{invoice.fechaVencimiento}
+								</p>
+								<p>
+									<strong>Descuento:</strong> {invoice.descuento}
+								</p>
+								<p>
+									<strong>TCEA:</strong> {invoice.TCEA}%
+								</p>
+							</div>
+						))}
+					</div>
+				</div>
+			</div>
+		</main>
+	);
 }
