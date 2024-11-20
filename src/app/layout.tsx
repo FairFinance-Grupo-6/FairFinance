@@ -47,23 +47,21 @@ export default async function RootLayout({
                       <NavbarOptions />
                     </Suspense>
                   </div>
-                  <div className="flex gap-5 items-center font-semibold">
-                    <div className="flex gap-5 items-center">
-                      <Suspense fallback={<AuthButtonSkeleton />}>
-                        {!hasEnvVars ? <EnvVarWarning /> : <AuthButton />}
-                      </Suspense>
-                      <ThemeSwitcher />
-                    </div>
+                  <div className="flex gap-5 items-center">
+                    <Suspense fallback={<AuthButtonSkeleton />}>
+                      {!hasEnvVars ? <EnvVarWarning /> : <AuthButton />}
+                    </Suspense>
+                    <ThemeSwitcher />
                   </div>
                 </div>
               </nav>
-            </div>
-            <div className="flex flex-1 w-full min-h-full  max-w-5xl mt-16 p-5">
-              {children}
+              <div className="flex flex-col gap-20 max-w-5xl p-5">
+                {children}
+              </div>
             </div>
           </main>
         </ThemeProvider>
       </body>
-    </html>
+    </html >
   );
 }
