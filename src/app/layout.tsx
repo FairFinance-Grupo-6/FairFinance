@@ -11,6 +11,7 @@ import AuthButtonSkeleton from "@/components/skeletons/AuthButtonSkeleton";
 import ToastProvider from "@/components/ToastProvider";
 import 'react-toastify/dist/ReactToastify.css';
 import { toast } from "react-toastify";
+import NavbarOptions from "@/components/navbar/NavbarOptions";
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -42,36 +43,17 @@ export default async function RootLayout({
               <nav className="w-full flex justify-center border-b border-b-foreground/10 h-16">
                 <div className="w-full max-w-5xl flex justify-between items-center p-3 px-5 text-sm">
                   <div className="flex gap-5 items-center font-semibold">
-                    <Link
-                      href={"/"}
-                      className="hover:text-[#5756BB] transition duration-200 ease-in-out"
-                    >
-                      Fair Finance
-                    </Link>
-                    <Link
-                      href={"/dashboard"}
-                      className="hover:text-[#5756BB] transition duration-200 ease-in-out"
-                    >
-                      Dashboard
-                    </Link>
-                    <Link
-                      href={"/dashboard/facturas"}
-                      className="hover:text-[#5756BB] transition duration-200 ease-in-out"
-                    >
-                      Facturas
-                    </Link>
-                    <Link
-                      href={"/dashboard/cartera"}
-                      className="hover:text-[#5756BB] transition duration-200 ease-in-out"
-                    >
-                      Cartera
-                    </Link>
-                  </div>
-                  <div className="flex gap-5 items-center">
                     <Suspense fallback={<AuthButtonSkeleton />}>
-                      {!hasEnvVars ? <EnvVarWarning /> : <AuthButton />}
+                      <NavbarOptions />
                     </Suspense>
-                    <ThemeSwitcher />
+                  </div>
+                  <div className="flex gap-5 items-center font-semibold">
+                    <div className="flex gap-5 items-center">
+                      <Suspense fallback={<AuthButtonSkeleton />}>
+                        {!hasEnvVars ? <EnvVarWarning /> : <AuthButton />}
+                      </Suspense>
+                      <ThemeSwitcher />
+                    </div>
                   </div>
                 </div>
               </nav>
