@@ -50,8 +50,8 @@ export interface Factura {
 export const useFactura = () => {
 	const [factura, setFactura] = useState<Factura>({
 		id: 0,
-		fechaEmision: "",
-		fechaVencimiento: "",
+		fechaEmision: null,
+		fechaVencimiento: null,
 		plazoDescuento: null,
 		importeNominal: "",
 		moneda: "PEN",
@@ -86,70 +86,34 @@ export const useFactura = () => {
 	const [descuento, setDescuento] = useState<number | null>(null);
 	const [isTceaCalculated, setIsTceaCalculated] = useState(false);
 
-	const addCosto = () => {
-		setFactura((prev) => ({
-			...prev,
-			costosAdicionales: [
-				...prev.costosAdicionales,
-				{
-					id: Date.now(),
-					descripcion: "",
-					monto: "",
-					esPorcentaje: false,
-					pagadoAlInicio: false,
-				},
-			],
-		}));
-	};
-
-	const removeCosto = (index: number) => {
-		const costosAdicionales = [...factura.costosAdicionales];
-		costosAdicionales.splice(index, 1);
-		setFactura((prev) => ({ ...prev, costosAdicionales }));
-	};
-
-	const handleInputChangeMora = (
-		e: React.ChangeEvent<HTMLInputElement>,
-		index: number,
-	) => {
-		const { name, value } = e.target;
-		const costosMora = [...factura.costosMora];
-		if (name === "descripcion") {
-			costosMora[index].descripcion = value;
-		} else if (name === "monto") {
-			costosMora[index].monto = value;
-		}
-		setFactura((prev) => ({ ...prev, costosMora }));
-	};
-
-	const removeCostoMora = (index: number) => {
-		const costosMora = [...factura.costosMora];
-		costosMora.splice(index, 1);
-		setFactura((prev) => ({ ...prev, costosMora }));
-	};
-
-	const addCostoMora = () => {
-		setFactura((prev) => ({
-			...prev,
-			costosMora: [
-				...prev.costosMora,
-				{
-					id: Date.now(),
-					descripcion: "",
-					monto: "",
-				},
-			],
-		}));
+	const isValidFactura = (): boolean => {
+		return (
+			factura.importeNominal.trim() !== "" &&
+			factura.fechaEmision !== null &&
+			factura.fechaVencimiento !== null &&
+			factura.portes.trim() !== "" &&
+			factura.retencion.trim() !== "" &&
+			factura.valorTasa.trim() !== "" &&
+			(!factura.conMora ||
+				(factura.valorTasaMora.trim() !== "" && factura.diasMora.trim() !== ""))
+		);
 	};
 
 	const handleCalculateTcea = () => {
+		if (!isValidFactura()) {
+			toast.error("Por favor, complete todos los campos obligatorios.", {
+				position: "top-right",
+			});
+			return;
+		}
+
 		try {
 			const diasDescuento = factura.plazoDescuento;
 
 			if (diasDescuento === null) {
 				toast.error(
-					"Por favor, proporciona el plazo de descuento o las fechas de emisión y vencimiento.",
-					{ position: "top-right" },
+					"Proporciona el plazo de descuento o las fechas de emisión y vencimiento.",
+					{ position: "top-right" }
 				);
 				return;
 			}
@@ -160,7 +124,7 @@ export const useFactura = () => {
 				factura.tipoTasa,
 				factura.tiempoTasa,
 				factura.tipoTasa === "Nominal" ? factura.capitalizacion : undefined,
-				Number(factura.valorTasa),
+				Number(factura.valorTasa)
 			);
 
 			let tceaValue: number;
@@ -169,7 +133,7 @@ export const useFactura = () => {
 				tceaValue = calcularTceaConMora(
 					Number(factura.importeNominal),
 					desc,
-					Number(factura.retencion) || 0,
+					Number(factura.retencion),
 					factura.costosAdicionales.map((c) => ({
 						descripcion: c.descripcion,
 						monto: c.esPorcentaje
@@ -182,22 +146,22 @@ export const useFactura = () => {
 						monto: Number(c.monto) || 0,
 					})),
 					diasDescuento,
-					Number(factura.valorTasa) || 0,
+					Number(factura.valorTasa),
 					factura.tipoTasa,
-					Number(factura.portes) || 0,
+					Number(factura.portes),
 					factura.capitalizacion,
 					factura.tiempoTasa,
-					Number(factura.diasMora) || 0,
-					Number(factura.valorTasaMora) || 0,
+					Number(factura.diasMora),
+					Number(factura.valorTasaMora),
 					factura.tipoTasaMora,
 					factura.tiempoTasaMora,
-					factura.capitalizacionMora,
+					factura.capitalizacionMora
 				);
 			} else {
 				tceaValue = calcularTcea(
 					Number(factura.importeNominal),
 					desc,
-					Number(factura.retencion) || 0,
+					Number(factura.retencion),
 					factura.costosAdicionales.map((c) => ({
 						descripcion: c.descripcion,
 						monto: c.esPorcentaje
@@ -205,17 +169,16 @@ export const useFactura = () => {
 							: Number(c.monto),
 						pagadoAlInicio: c.pagadoAlInicio,
 					})),
-					Number(factura.portes) || 0,
-					diasDescuento,
+					Number(factura.portes),
+					diasDescuento
 				);
 			}
 
 			setTcea(tceaValue);
 			setDescuento(desc);
-
 			setIsTceaCalculated(true);
 		} catch (error) {
-			console.log("Error al calcular el TCEA:", error);
+			console.error("Error al calcular el TCEA:", error);
 			toast.error("Por favor, completa todos los campos correctamente.", {
 				position: "top-right",
 			});
@@ -225,72 +188,72 @@ export const useFactura = () => {
 	const handleInputChange = (
 		e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
 		index?: number,
+		section?: "costosAdicionales" | "costosMora"
 	) => {
 		const { name, value, type } = e.target;
 		const checked = (e.target as HTMLInputElement).checked;
 
-		if (type === "checkbox" && name === "conMora") {
-			setFactura((prev) => ({ ...prev, [name]: checked }));
-			return;
-		}
+		if (section) {
+			const updatedCosts = [...factura[section]];
 
-		if (
-			name.startsWith("costoDescripcion") ||
-			name.startsWith("costoMonto") ||
-			name.startsWith("costoPagadoAlInicio") ||
-			name.startsWith("costoPorcentaje")
-		) {
-			const costosAdicionales = [...factura.costosAdicionales];
 			if (index !== undefined) {
-				if (name.includes("Descripcion")) {
-					costosAdicionales[index].descripcion = value;
-				} else if (name.includes("Monto")) {
-					costosAdicionales[index].monto = value;
-				} else if (name.includes("PagadoAlInicio")) {
-					costosAdicionales[index].pagadoAlInicio = checked;
-				} else if (name.includes("Porcentaje")) {
-					costosAdicionales[index].esPorcentaje = checked;
+				const currentCost = updatedCosts[index];
+
+				if (section === "costosAdicionales" && isCosto(currentCost)) {
+					if (name === `esPorcentaje${index}` || name === `pagadoAlInicio${index}`) {
+						currentCost[name.includes("esPorcentaje") ? "esPorcentaje" : "pagadoAlInicio"] = checked;
+					} else if (name === "descripcion" || name === "monto") {
+						currentCost[name] = value;
+					}
+				}
+
+				if (section === "costosMora" && isCostoMora(currentCost)) {
+					if (name === "descripcion" || name === "monto") {
+						currentCost[name] = value;
+					}
 				}
 			}
-			setFactura((prev) => ({ ...prev, costosAdicionales }));
+
+			setFactura((prev) => ({ ...prev, [section]: updatedCosts }));
 			return;
 		}
 
-		if (name === "plazoDescuento") {
-			setFactura((prev) => ({
-				...prev,
-				plazoDescuento: value ? Number(value) : null,
-				fechaEmision: "",
-				fechaVencimiento: "",
-			}));
-		} else if (name === "fechaEmision" || name === "fechaVencimiento") {
-			setFactura((prev) => ({
-				...prev,
-				[name]: value,
-				plazoDescuento: null,
-			}));
-		} else {
-			setFactura((prev) => ({ ...prev, [name]: value }));
-		}
+		setFactura((prev) => ({
+			...prev,
+			[name]: type === "checkbox" ? checked : value.trim(),
+		}));
+
 
 		setIsTceaCalculated(false);
 		setTcea(null);
 		setDescuento(null);
 	};
 
+
+	const isCosto = (obj: any): obj is Costo => {
+		return obj && "esPorcentaje" in obj && "pagadoAlInicio" in obj;
+	};
+
+	const isCostoMora = (obj: any): obj is CostoMora => {
+		return obj && !("esPorcentaje" in obj) && !("pagadoAlInicio" in obj);
+	};
+
+
+
+
 	useEffect(() => {
 		if (factura.fechaEmision && factura.fechaVencimiento) {
 			try {
 				const diasDescuento = calcularDiasDescuento(
 					factura.fechaEmision,
-					factura.fechaVencimiento,
+					factura.fechaVencimiento
 				);
 				setFactura((prev) => ({
 					...prev,
 					plazoDescuento: diasDescuento,
 				}));
 			} catch (error: any) {
-				console.log("Error al calcular el plazo de descuento:", error);
+				console.error("Error al calcular el plazo de descuento:", error);
 				toast.error(error.message, { position: "top-right" });
 				setFactura((prev) => ({
 					...prev,
@@ -305,12 +268,41 @@ export const useFactura = () => {
 		tcea,
 		descuento,
 		isTceaCalculated,
-		handleInputChangeMora,
 		handleInputChange,
 		handleCalculateTcea,
-		addCosto,
-		removeCosto,
-		addCostoMora,
-		removeCostoMora,
+		addCosto: () => {
+			setFactura((prev) => ({
+				...prev,
+				costosAdicionales: [
+					...prev.costosAdicionales,
+					{
+						id: Date.now(),
+						descripcion: "",
+						monto: "",
+						esPorcentaje: false,
+						pagadoAlInicio: false,
+					},
+				],
+			}));
+		},
+		removeCosto: (index: number) => {
+			const costosAdicionales = [...factura.costosAdicionales];
+			costosAdicionales.splice(index, 1);
+			setFactura((prev) => ({ ...prev, costosAdicionales }));
+		},
+		addCostoMora: () => {
+			setFactura((prev) => ({
+				...prev,
+				costosMora: [
+					...prev.costosMora,
+					{ id: Date.now(), descripcion: "", monto: "" },
+				],
+			}));
+		},
+		removeCostoMora: (index: number) => {
+			const costosMora = [...factura.costosMora];
+			costosMora.splice(index, 1);
+			setFactura((prev) => ({ ...prev, costosMora }));
+		},
 	};
 };
