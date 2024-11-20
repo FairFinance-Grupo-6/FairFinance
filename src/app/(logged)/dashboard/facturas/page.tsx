@@ -37,7 +37,7 @@ interface Factura {
 	diasDemora: number;
 	comisionTardia: string;
 	protesto: boolean;
-	responsable: string;
+	receptor: string;
 }
 
 interface FacturaTableProps {
@@ -129,7 +129,7 @@ export default function FacturasPage() {
 					"Dias Mora",
 					"Comision Tardia",
 					"Protesto",
-					"Responsable",
+					"Receptor",
 				],
 			],
 			body: facturas.map((invoice) => [
@@ -150,7 +150,7 @@ export default function FacturasPage() {
 				invoice.diasDemora || "-", // Si no tiene días de demora, muestra "-"
 				invoice.comisionTardia || "-", // Si no tiene comisión tardía, muestra "-"
 				invoice.protesto ? "Sí" : "-", // Si protesto es verdadero, muestra "Sí", si no "-"
-				invoice.responsable,
+				invoice.receptor,
 			]),
 			startY: 35,
 			theme: "grid",
