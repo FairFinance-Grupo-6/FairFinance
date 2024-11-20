@@ -4,6 +4,7 @@ import { encodedRedirect } from "@/utils/utils";
 import { createClient } from "@/utils/supabase/server";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { Factura } from "./hooks/useFactura";
 
 // biome-ignore lint/suspicious/noExplicitAny: <explanation>
 export async function signUpAction(formData: FormData): Promise<any> {
@@ -71,6 +72,7 @@ export async function signUpAction(formData: FormData): Promise<any> {
 	}
 }
 
+<<<<<<< HEAD
 export async function saveInvoice(factura: any): Promise<any> {
 	console.log("formData", factura);
 	const supabase = await createClient();
@@ -114,6 +116,49 @@ export async function saveInvoice(factura: any): Promise<any> {
 			descuento: facturaData.descuento,
 			user_id: user_id,
 		};
+=======
+export async function saveInvoice(factura: Factura): Promise<any> {
+  console.log("formData", factura);
+  const supabase = await createClient();
+  const facturaData = factura;
+  try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    const user_id = user?.id || "unknown";
+    console.log("user", user);
+
+    const invoice_to_save = {
+      idFactura: facturaData.id,
+      fechaEmision: facturaData.fechaEmision,
+      fechaVencimiento: facturaData.fechaVencimiento,
+      plazoDescuento: facturaData.plazoDescuento,
+      importeNominal: facturaData.importeNominal,
+      moneda: facturaData.moneda,
+      tipoTasa: facturaData.tipoTasa,
+      tiempoTasa: facturaData.tiempoTasa,
+      capitalizacion: facturaData.capitalizacion,
+      valorTasa: parseInt(facturaData.valorTasa || "0"),
+      costosAdicionales: facturaData.costosAdicionales.reduce((acc: number, costo: any) => {
+        return acc + parseFloat(costo.monto);
+      }, 0),
+      costosMora: facturaData.costosMora.reduce((acc: number, costo: any) => {
+        return acc + parseFloat(costo.monto);
+      }, 0),
+      portes: parseInt(facturaData.portes || "0"),
+      retencion: parseInt(facturaData.retencion || "0"),
+      tipoTasaMora: facturaData.tipoTasaMora,
+      tiempoTasaMora: facturaData.tiempoTasaMora,
+      capitalizacionMora: facturaData.capitalizacionMora,
+      valorTasaMora: facturaData.valorTasaMora,
+      diasMora: parseInt(facturaData.diasMora || "0"),
+      conMora: facturaData.conMora,
+      tcea: facturaData.tcea,
+      descuento: facturaData.descuento,
+      receptor: facturaData.receptor,
+      user_id: user_id, 
+    };
+>>>>>>> 5911bc6e7532cb0d7aca42b843b956585aac9e1b
 
 		console.log("invoice_to_save", invoice_to_save);
 		await supabase.from("documents").insert([invoice_to_save]);
