@@ -11,7 +11,7 @@ export default function Index() {
       title: "Fair Finance",
       description:
         "Simplifica la gestión de tus facturas. Registra, analiza y optimiza tu cartera financiera con facilidad.",
-      button1Text: "Regístrate ahora",
+      button1Text: "Descubre ahora",
       button2Text: "Ver más",
       imageSrc: "/faircat.png",
       bgColor: "bg-gradient-to-r from-purple-700 via-purple-500 to-purple-700",
