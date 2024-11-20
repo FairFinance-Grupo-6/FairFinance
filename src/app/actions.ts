@@ -5,6 +5,7 @@ import { createClient } from "@/utils/supabase/server";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { Factura } from "./hooks/useFactura";
+import { toast } from "react-toastify";
 
 // biome-ignore lint/suspicious/noExplicitAny: <explanation>
 export async function signUpAction(formData: FormData): Promise<any> {
@@ -113,6 +114,7 @@ export async function saveInvoice(factura: any): Promise<any> {
 			conMora: facturaData.conMora,
 			tcea: facturaData.tcea,
 			descuento: facturaData.descuento,
+			receptor: facturaData.receptor,
 			user_id: user_id,
 		};
 
@@ -205,5 +207,8 @@ export const resetPasswordAction = async (formData: FormData) => {
 export const signOutAction = async () => {
 	const supabase = await createClient();
 	await supabase.auth.signOut();
+	toast.success("Sesión cerrada correctamente.", {
+		position: "top-right",
+	});
 	return redirect("/sign-in");
 };
