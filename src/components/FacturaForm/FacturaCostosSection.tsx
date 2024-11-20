@@ -7,6 +7,7 @@ interface FacturaCostosSectionProps {
   handleInputChange: (
     event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
     index?: number,
+    section?: "costosAdicionales" | "costosMora"
   ) => void;
   addCosto: () => void;
   removeCosto: (index: number) => void;
@@ -80,12 +81,14 @@ export const FacturaCostosSection: React.FC<FacturaCostosSectionProps> = ({
                 </label>
                 <input
                   type="text"
-                  name={`costoDescripcion${index}`}
-                  value={costo.descripcion}
-                  onChange={(e) => handleInputChange(e, index)}
+                  name="descripcion"
                   className="w-full border border-gray-300 dark:border-gray-600 p-2 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-                  placeholder="Descripción"
+                  placeholder="Ingrese la descripción del costo"
+                  value={costo.descripcion}
+                  onChange={(e) => handleInputChange(e, index, "costosAdicionales")}
                 />
+
+
               </div>
               <div className="flex-1">
                 <label className="block text-gray-700 dark:text-gray-200 mb-1">
@@ -94,11 +97,11 @@ export const FacturaCostosSection: React.FC<FacturaCostosSectionProps> = ({
                 <div className="relative">
                   <input
                     type="number"
-                    name={`costoMonto${index}`}
-                    value={costo.monto}
-                    onChange={(e) => handleInputChange(e, index)}
+                    name="monto"
                     className="w-full border border-gray-300 dark:border-gray-600 p-2 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-                    placeholder="Monto"
+                     
+                    value={costo.monto}
+                    onChange={(e) => handleInputChange(e, index, "costosAdicionales")}
                   />
                   {!costo.esPorcentaje && (
                     <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">
@@ -116,9 +119,10 @@ export const FacturaCostosSection: React.FC<FacturaCostosSectionProps> = ({
                   <label className="relative inline-flex items-center cursor-pointer">
                     <input
                       type="checkbox"
-                      name={`costoPorcentaje${index}`}
+                      name={`esPorcentaje${index}`}
                       checked={costo.esPorcentaje}
-                      onChange={(e) => handleInputChange(e, index)}
+                      onChange={(e) => handleInputChange(e, index, "costosAdicionales")}
+                    
                       className="sr-only peer"
                     />
                     <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-purple-600 dark:peer-focus:ring-purple-400 rounded-full peer dark:bg-gray-600 peer-checked:bg-purple-600 dark:peer-checked:bg-purple-500 transition-all"></div>
@@ -134,9 +138,9 @@ export const FacturaCostosSection: React.FC<FacturaCostosSectionProps> = ({
                   <label className="relative inline-flex items-center cursor-pointer">
                     <input
                       type="checkbox"
-                      name={`costoPagadoAlInicio${index}`}
+                      name={`pagadoAlInicio${index}`}
                       checked={costo.pagadoAlInicio}
-                      onChange={(e) => handleInputChange(e, index)}
+                      onChange={(e) => handleInputChange(e, index, "costosAdicionales")}
                       className="sr-only peer"
                     />
                     <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-purple-600 dark:peer-focus:ring-purple-400 rounded-full peer dark:bg-gray-600 peer-checked:bg-purple-600 dark:peer-checked:bg-purple-500 transition-all"></div>

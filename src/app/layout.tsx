@@ -57,13 +57,13 @@ export default async function RootLayout({
                   </div>
                 </div>
               </nav>
-              <div className="flex flex-col gap-20 max-w-5xl p-5">
-                {children}
-              </div>
+            </div>
+            <div className="flex flex-1 w-full min-h-full  max-w-5xl mt-16 p-5">
+              {children}
             </div>
           </main>
         </ThemeProvider>
       </body>
-    </html >
+    </html>
   );
 }

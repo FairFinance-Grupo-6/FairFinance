@@ -54,7 +54,7 @@ export default function Index() {
   };
 
   return (
-    <main className="flex-1 flex flex-col items-center bg-white">
+    <main className="flex-1  flex flex-col items-center dark:bg-black 0 0% 3.9% bg-white ">
       {/* Si showFaqs es verdadero, muestra el componente FAQs */}
       {showFaqs ? (
         <FAQs />
@@ -63,7 +63,7 @@ export default function Index() {
         <section
           className={`w-full max-w-5xl flex flex-col md:flex-row items-center justify-between py-56 gap-8 ${sections[currentSection].bgColor} text-white rounded-lg shadow-md relative overflow-hidden`}
         >
-          <div className="flex-1 flex flex-col items-start gap-4 px-6" style={{ marginTop: "-120px" }}>
+          <div className="flex-1 flex flex-col  items-start gap-4 px-6" style={{ marginTop: "-120px" }}>
             <h1 className="text-4xl font-bold">{sections[currentSection].title}</h1>
             <p className="text-lg">{sections[currentSection].description}</p>
             <div className="flex gap-4">
