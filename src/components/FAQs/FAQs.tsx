@@ -6,7 +6,7 @@ const FAQs = () => {
   const faqs = [
     { question: "¿Cómo me registro?", answer: "Puedes registrarte utilizando el formulario en la página principal." },
     { question: "¿Olvidé mi contraseña, qué hago?", answer: "Haz clic en 'Olvidé mi contraseña' en la página de inicio de sesión para restablecerla." },
-    { question: "¿Puedo modificar mi perfil?", answer: "Sí, puedes editar tus datos personales desde la sección de configuración de tu cuenta." },
+    { question: "¿Puedo modificar mi perfil?", answer: "No, no puedes editar tus datos personales, pero no te preocupes ponte en contacto con nosotros y lo haremos por ti" },
     { question: "¿Cómo contacto al soporte?", answer: "Puedes comunicarte con el soporte a través de la página de contacto en nuestro sitio." },
   ];
 
