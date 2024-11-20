@@ -28,7 +28,7 @@ export default function BriefcasesPage() {
 
 		const promedioTCEA =
 			filteredInvoices.reduce(
-				(sum: any, invoice: any) => sum + invoice.TCEA,
+				(sum: any, invoice: any) => sum + invoice.tcea,
 				0,
 			) / totalFacturas;
 
@@ -193,7 +193,12 @@ export default function BriefcasesPage() {
 									{invoice.fechaVencimiento}
 								</p>
 								<p>
-									<strong>TCEA:</strong> {invoice.TCEA}%
+									<strong>TCEA:</strong>{" "}
+									{Number.parseFloat(invoice.tcea).toFixed(2)}%
+								</p>
+								<p>
+									<strong>Descuento:</strong>{" "}
+									{Number.parseFloat(invoice.descuento).toFixed(2)}
 								</p>
 							</div>
 						))}
