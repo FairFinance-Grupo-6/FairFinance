@@ -7,9 +7,9 @@ import { createClient } from "@/utils/supabase/server";
 import { DropMyAccount } from "./DropMyAccount";
 
 export default async function AuthButton() {
-	const {
-		data: { user },
-	} = await (await createClient()).auth.getUser();
+	const supabase = await createClient();
+
+	const { data: { user }, error } = await supabase.auth.getUser();
 
 	if (!hasEnvVars) {
 		return (

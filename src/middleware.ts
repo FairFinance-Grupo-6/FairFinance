@@ -36,20 +36,10 @@ export const middleware = async (request: NextRequest) => {
 			data: { user },
 		} = await supabase.auth.getUser();
 
-		const needLoggedIn = ["/dashboard", "/profile", "reset-password"];
+		const needLoggedIn = ["dashboard", "profile", "reset-password"];
 
-		if (needLoggedIn.includes(request.nextUrl.pathname) && !user) {
+		if (user === null && needLoggedIn.includes(request.nextUrl.pathname)) {
 			return NextResponse.redirect(new URL("/sign-in", request.url));
-		}
-
-		if (request.nextUrl.pathname === "/sign-in" && user) {
-			return NextResponse.redirect(new URL("/dashboard", request.url));
-		}
-		if (request.nextUrl.pathname === "/sign-up" && user) {
-			return NextResponse.redirect(new URL("/dashboard", request.url));
-		}
-		if (request.nextUrl.pathname === "/" && user) {
-			return NextResponse.redirect(new URL("/dashboard", request.url));
 		}
 
 		return response;

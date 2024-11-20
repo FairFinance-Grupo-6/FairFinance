@@ -60,14 +60,14 @@ export async function signUpAction(formData: FormData): Promise<any> {
 			]);
 
 		if (profileError) throw new Error(profileError.message);
-
+		toast.success("Usuario creado correctamente.", {
+			position: "top-right",
+		});
 		return encodedRedirect(
 			"success",
 			"/sign-up",
 			"Thanks for signing up! Please check your email for a verification link.",
 		);
-
-		// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 	} catch (error: any) {
 		return encodedRedirect("error", "/sign-up", error.message);
 	}
@@ -206,9 +206,14 @@ export const resetPasswordAction = async (formData: FormData) => {
 
 export const signOutAction = async () => {
 	const supabase = await createClient();
-	await supabase.auth.signOut();
-	toast.success("Sesión cerrada correctamente.", {
-		position: "top-right",
-	});
-	return redirect("/sign-in");
+	console.log("signing out...");
+	const { error } = await supabase.auth.signOut();
+	if (error) {
+		return encodedRedirect("error", "/sign-in", error.message);
+	}
+	return encodedRedirect(
+		"success",
+		"/sign-in",
+		"Sesión cerrada correctamente.",
+	);
 };

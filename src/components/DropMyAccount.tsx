@@ -34,15 +34,17 @@ export function DropMyAccount({ user }: { user: User }) {
 					<Button variant="outline" className="w-full text-left">
 						<Link href="/reset-password">Cambiar contraseña</Link>
 					</Button>
-					<form action={signOutAction}>
-						<Button
-							type="submit"
-							variant="outline"
-							className="w-full text-left"
-						>
-							Cerrar sesión
-						</Button>
-					</form>
+					<Button
+						type="submit"
+						variant="outline"
+						className="w-full text-left"
+						onClick={() => {
+							setIsDropdownOpen(false);
+							signOutAction();
+						}}
+					>
+						Cerrar sesión
+					</Button>
 				</div>
 			)}
 		</div>
