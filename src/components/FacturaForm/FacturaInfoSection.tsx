@@ -1,5 +1,5 @@
-import React from "react";
-import { Factura } from "@/app/hooks/useFactura";
+import type React from "react";
+import type { Factura } from "@/app/hooks/useFactura";
 
 interface FacturaInfoSectionProps {
   factura: Factura;
@@ -19,10 +19,11 @@ export const FacturaInfoSection: React.FC<FacturaInfoSectionProps> = ({
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       {/* Campo ID de Factura */}
       <div>
-        <label className="block font-medium text-gray-700 dark:text-gray-200">
+        <label htmlFor="id" className="block font-medium text-gray-700 dark:text-gray-200">
           ID de Factura:
         </label>
         <input
+          id="id"
           type="text"
           name="id"
           value={factura.id}
@@ -34,10 +35,11 @@ export const FacturaInfoSection: React.FC<FacturaInfoSectionProps> = ({
       </div>
       {/* Campo Receptor */}
       <div>
-        <label className="block font-medium text-gray-700 dark:text-gray-200">
+        <label htmlFor="receptor" className="block font-medium text-gray-700 dark:text-gray-200">
           Receptor:
         </label>
         <input
+          id="receptor"
           type="text"
           name="receptor"
           value={factura.receptor}
@@ -49,10 +51,11 @@ export const FacturaInfoSection: React.FC<FacturaInfoSectionProps> = ({
       </div>
       {/* Campo Moneda */}
       <div>
-        <label className="block font-medium text-gray-700 dark:text-gray-200">
+        <label htmlFor="moneda" className="block font-medium text-gray-700 dark:text-gray-200">
           Moneda:
         </label>
         <select
+          id="moneda"
           name="moneda"
           value={factura.moneda}
           onChange={handleInputChange}
@@ -64,10 +67,11 @@ export const FacturaInfoSection: React.FC<FacturaInfoSectionProps> = ({
       </div>
       {/* Campo Importe Nominal */}
       <div>
-        <label className="block font-medium text-gray-700 dark:text-gray-200">
+        <label htmlFor="importeNominal" className="block font-medium text-gray-700 dark:text-gray-200">
           Importe Nominal:
         </label>
         <input
+          id="importeNominal"
           type="number"
           name="importeNominal"
           value={factura.importeNominal}
@@ -79,10 +83,11 @@ export const FacturaInfoSection: React.FC<FacturaInfoSectionProps> = ({
       </div>
       {/* Campo Fecha de Emisión */}
       <div>
-        <label className="block font-medium text-gray-700 dark:text-gray-200">
+        <label htmlFor="fechaEmision" className="block font-medium text-gray-700 dark:text-gray-200">
           Fecha de Emisión:
         </label>
         <input
+          id="fechaEmision"
           type="date"
           name="fechaEmision"
           value={factura.fechaEmision ?? ""}
@@ -92,10 +97,11 @@ export const FacturaInfoSection: React.FC<FacturaInfoSectionProps> = ({
       </div>
       {/* Campo Fecha de Vencimiento */}
       <div>
-        <label className="block font-medium text-gray-700 dark:text-gray-200">
+        <label htmlFor="fechaVencimiento" className="block font-medium text-gray-700 dark:text-gray-200">
           Fecha de Vencimiento:
         </label>
         <input
+          id="fechaVencimiento"
           type="date"
           name="fechaVencimiento"
           value={factura.fechaVencimiento ?? ""}
@@ -105,10 +111,10 @@ export const FacturaInfoSection: React.FC<FacturaInfoSectionProps> = ({
       </div>
       {/* Campo Plazo de Descuento */}
       <div>
-        <label className="block font-medium text-gray-700 dark:text-gray-200">
+        <label htmlFor="plazoDescuento" className="block font-medium text-gray-700 dark:text-gray-200">
           Plazo de Descuento (en días):
         </label>
-        <p className="w-full border border-gray-300 dark:border-gray-600 p-2 rounded-md bg-purple-100 dark:bg-purple-800 text-gray-900 dark:text-gray-100">
+        <p id="plazoDescuento" className="w-full border border-gray-300 dark:border-gray-600 p-2 rounded-md bg-purple-100 dark:bg-purple-800 text-gray-900 dark:text-gray-100">
           {factura.plazoDescuento !== null
             ? factura.plazoDescuento
             : "N/A"}
