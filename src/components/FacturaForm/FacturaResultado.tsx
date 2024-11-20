@@ -3,14 +3,16 @@ import { Factura } from "@/app/hooks/useFactura";
 import { FaTrashAlt } from "react-icons/fa";
 
 interface FacturaResultadoSectionProps {
-  tcea: number | null;
   isTceaCalculated: boolean;
   handleCalculateTcea: () => void;
+  descuento: number | null;
+  tcea: number | null;
+  moneda: string;
 }
 
 export const FacturaResultadoSection: React.FC<
   FacturaResultadoSectionProps
-> = ({ tcea, isTceaCalculated, handleCalculateTcea }) => (
+> = ({ tcea, descuento, moneda, isTceaCalculated, handleCalculateTcea }) => (
   <div className="space-y-4">
     {tcea !== null && (
       <div className="text-center text-lg font-semibold">
@@ -18,10 +20,15 @@ export const FacturaResultadoSection: React.FC<
         <input
           type="text"
           name="tcea"
-          value={tcea !== null ? tcea.toFixed(7) : ""}
+          value={tcea  !== null ? `${tcea .toFixed(7)}%` : ""}
           readOnly
           className="text-center text-blue-600 border-none bg-transparent"
         />
+      </div>
+    )}
+     {descuento !== null && (
+      <div className="text-center text-lg font-semibold">
+        Descuento: {moneda} {descuento.toFixed(2)}
       </div>
     )}
     <button

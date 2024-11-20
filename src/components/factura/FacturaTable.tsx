@@ -24,7 +24,7 @@ interface Factura {
 	costosAdicionales: number;
 	portes: string;
 	descuento: number;
-	TCEA: number;
+	tcea: number;
 	responsable: string;
 }
 
@@ -89,8 +89,8 @@ export const FacturaTable: React.FC<FacturaTableProps> = ({ facturas }) => {
 							<td className="p-4">{invoice.costosAdicionales}</td>
 							<td className="p-4">{invoice.tipoTasa}</td>
 							<td className="p-4">{invoice.valorTasa}</td>
-							<td className="p-4">{invoice.descuento}</td>
-							<td className="p-4">{invoice.TCEA}</td>
+							<td className="p-4">{invoice.descuento.toFixed(2)}</td>
+							<td className="p-4">{invoice.tcea.toFixed(7)}</td>
 							<td className="p-4">{invoice.responsable}</td>
 						</tr>
 					))}
