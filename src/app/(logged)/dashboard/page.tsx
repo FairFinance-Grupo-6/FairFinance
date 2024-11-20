@@ -95,12 +95,13 @@ export default function Dashboard() {
 				</div>
 
 				<div className="flex flex-col items-center justify-center">
-					<Image
-						src="/cat1.png"
-						alt="Imagen de saludo"
-						width={110}
-						height={110}
-					/>
+				<Image
+					src={currentTheme === "dark" ? "/cat11.png" : "/cat1.png"}
+					alt="Imagen de saludo"
+					width={110}
+					height={110}
+				/>
+
 
 					<button
 						type="button"
