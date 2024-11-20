@@ -215,7 +215,7 @@ export const useFactura = () => {
 
 			setIsTceaCalculated(true);
 		} catch (error) {
-			console.error("Error al calcular el TCEA:", error);
+			console.log("Error al calcular el TCEA:", error);
 			toast.error("Por favor, completa todos los campos correctamente.", {
 				position: "top-right",
 			});
@@ -290,7 +290,7 @@ export const useFactura = () => {
 					plazoDescuento: diasDescuento,
 				}));
 			} catch (error: any) {
-				console.error("Error al calcular el plazo de descuento:", error);
+				console.log("Error al calcular el plazo de descuento:", error);
 				toast.error(error.message, { position: "top-right" });
 				setFactura((prev) => ({
 					...prev,
