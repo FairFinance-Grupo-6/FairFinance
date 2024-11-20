@@ -22,7 +22,6 @@ export default function FacturaForm() {
     tcea,
     descuento,
     isTceaCalculated,
-    handleInputChangeMora,
     handleInputChange,
     handleCalculateTcea,
     addCosto,
@@ -81,13 +80,13 @@ export default function FacturaForm() {
         <FacturaMoraSection
           factura={factura}
           handleInputChange={handleInputChange}
-          handleInputChangeMora={handleInputChangeMora}
           addCostoMora={addCostoMora}
           removeCostoMora={removeCostoMora}
         />
 
         <FacturaResultadoSection
           tcea={tcea}
+          factura={factura}
           descuento={descuento}
           moneda={factura.moneda}
           isTceaCalculated={isTceaCalculated}

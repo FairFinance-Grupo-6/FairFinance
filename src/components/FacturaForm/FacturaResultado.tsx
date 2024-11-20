@@ -1,3 +1,4 @@
+import { Factura } from "@/app/hooks/useFactura";
 import React from "react";
 
 interface FacturaResultadoSectionProps {
@@ -6,7 +7,9 @@ interface FacturaResultadoSectionProps {
   descuento: number | null;
   tcea: number | null;
   moneda: string;
+  factura: Factura;
 }
+
 
 export const FacturaResultadoSection: React.FC<
   FacturaResultadoSectionProps
@@ -16,13 +19,23 @@ export const FacturaResultadoSection: React.FC<
   moneda,
   isTceaCalculated,
   handleCalculateTcea,
-}) => (
-  <div className="bg-white dark:bg-gray-800 shadow p-6 rounded-md space-y-6">
+  factura
+}) => {
+  const isReadyToCalculate =
+    factura.importeNominal !== null &&
+    factura.fechaEmision !== null &&
+    factura.fechaVencimiento !== null &&
+    factura.portes !== null &&
+    factura.retencion !== null &&
+    factura.valorTasa !== null &&
+    (!factura.conMora || (factura.valorTasaMora !== null && factura.diasMora !== null));
+
+  return ( <div className="bg-white dark:bg-gray-800 shadow p-6 rounded-md space-y-6">
     {tcea !== null && (
       <div className="text-center text-2xl font-bold text-purple-600 dark:text-purple-400">
         TCEA Calculado:{" "}
         <span className="text-blue-600 dark:text-blue-400">
-          {tcea !== null ? `${tcea.toFixed(7)}%` : ""}
+          {tcea.toFixed(7)}%
         </span>
       </div>
     )}
@@ -38,7 +51,12 @@ export const FacturaResultadoSection: React.FC<
       <button
         type="button"
         onClick={handleCalculateTcea}
-        className="w-full md:w-auto bg-purple-600 hover:bg-purple-700 text-white py-3 px-6 rounded-md transition"
+        disabled={!isReadyToCalculate}
+        className={`w-full md:w-auto py-3 px-6 rounded-md transition ${
+          isReadyToCalculate
+            ? "bg-purple-600 hover:bg-purple-700 text-white"
+            : "bg-gray-300 text-gray-500 cursor-not-allowed"
+        }`}
       >
         Calcular TCEA
       </button>
@@ -56,3 +74,4 @@ export const FacturaResultadoSection: React.FC<
     </div>
   </div>
 );
+};
