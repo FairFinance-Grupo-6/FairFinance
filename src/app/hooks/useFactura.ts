@@ -44,6 +44,7 @@ import {
     costosMora: CostoMora[];
     tcea: number | null;
     descuento: number | null;
+    receptor: string;
   }
   
   export const useFactura = () => {
@@ -78,6 +79,7 @@ import {
       conMora: false,
       tcea: null,
       descuento: null,
+      receptor: "",
     });
   
     const [tcea, setTcea] = useState<number | null>(null);

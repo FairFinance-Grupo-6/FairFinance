@@ -67,3 +67,24 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Estilos para los Toggle Switches */
+.toggle-checkbox:checked {
+  right: 0;
+  border-color: #34d399; /* Color del borde cuando está activo */
+}
+
+.toggle-checkbox:checked + .toggle-label {
+  background-color: #34d399; /* Color de fondo cuando está activo */
+}
+
+.toggle-checkbox {
+  right: 4px;
+  background-color: white;
+  border: 1px solid #d1d5db;
+}
+
+.toggle-label {
+  background-color: #d1d5db;
+}
+
