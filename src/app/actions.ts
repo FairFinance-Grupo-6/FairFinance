@@ -4,6 +4,7 @@ import { encodedRedirect } from "@/utils/utils";
 import { createClient } from "@/utils/supabase/server";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { Factura } from "./hooks/useFactura";
 
 // biome-ignore lint/suspicious/noExplicitAny: <explanation>
 export async function signUpAction(formData: FormData): Promise<any> {
@@ -71,7 +72,7 @@ export async function signUpAction(formData: FormData): Promise<any> {
   }
 }
 
-export async function saveInvoice(factura: any): Promise<any> {
+export async function saveInvoice(factura: Factura): Promise<any> {
   console.log("formData", factura);
   const supabase = await createClient();
   const facturaData = factura;
@@ -86,7 +87,7 @@ export async function saveInvoice(factura: any): Promise<any> {
       idFactura: facturaData.id,
       fechaEmision: facturaData.fechaEmision,
       fechaVencimiento: facturaData.fechaVencimiento,
-      plazoDescuento: parseInt(facturaData.plazoDescuento || "0"),
+      plazoDescuento: facturaData.plazoDescuento,
       importeNominal: facturaData.importeNominal,
       moneda: facturaData.moneda,
       tipoTasa: facturaData.tipoTasa,
@@ -109,6 +110,7 @@ export async function saveInvoice(factura: any): Promise<any> {
       conMora: facturaData.conMora,
       tcea: facturaData.tcea,
       descuento: facturaData.descuento,
+      receptor: facturaData.receptor,
       user_id: user_id, 
     };
 
