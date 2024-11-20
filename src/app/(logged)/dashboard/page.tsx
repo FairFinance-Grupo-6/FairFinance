@@ -80,9 +80,10 @@ export default function Dashboard() {
 		<main className={"w-full mx-auto space-y-6 text-black pt-20"}>
 			<div className="flex items-center justify-between space-x-4">
 				<div>
-					<h1 className="text-2xl font-semibold">
-						Bienvenido a tu Dashboard, {user.name}
-					</h1>
+				<h1 className="text-2xl font-semibold text-black dark:text-white">
+					Bienvenido a tu Dashboard, {user.name}
+				</h1>
+
 					<span className={`${styles.mutedText} font-normal`}>
 						Estas son tus facturas registradas
 					</span>
@@ -112,14 +113,14 @@ export default function Dashboard() {
 				{sortedInvoices.map((invoice) => (
 					<div
 						key={invoice.id}
-						className="bg-white/30 backdrop-blur-lg rounded-lg p-6 space-y-4 shadow-lg"
+						className="bg-white/30 backdrop-blur-lg rounded-lg p-6 space-y-4 shadow-lg dark:bg-grey dark:bg-opacity-30"
 					>
 						{/* Fondo blurry y bordes redondeados */}
 						<div>
-							<div className="text-sm text-gray-500">
+							<div className="text-sm text-gray-500 dark:text-white">
 								Factura: {invoice.idFactura}
 							</div>
-							<div className="text-sm text-gray-500">
+							<div className="text-sm text-gray-500 dark:text-white">
 								Fecha de emisión: {invoice.fechaEmision}
 							</div>
 							<div className="text-xl font-semibold">
