@@ -219,17 +219,58 @@ export default function FacturasPage() {
 				</Link>
 			</div>
 
-			<div className="relative">
-				<Image
-					src="/cat3.png"
-					alt="Cats"
-					width={100}
-					height={100}
-					className="absolute top-[-86px] left-1/2 transform -translate-x-1/2 z-10"
-				/>
-				<FacturaTable facturas={currentInvoices} />
-			</div>
-
+			{facturas.length === 0 ? (
+				<table className="min-w-full text-sm text-center table-auto transition-all duration-300">
+					<thead className="bg-[#5756BB] text-white">
+						<tr>
+							<th className="p-4 font-medium border-b border-gray-500">Id</th>
+							<th className="p-4 font-medium border-b border-gray-500">
+								Fecha Emision
+							</th>
+							<th className="p-4 font-medium border-b border-gray-500">
+								Importe
+							</th>
+							<th className="p-4 font-medium border-b border-gray-500">Moneda</th>
+							<th className="p-4 font-medium border-b border-gray-500">
+								Costos Adicionales
+							</th>
+							<th className="p-4 font-medium border-b border-gray-500">
+								Tipo Tasa
+							</th>
+							<th className="p-4 font-medium border-b border-gray-500">
+								Valor Tasa(%)
+							</th>
+							<th className="p-4 font-medium border-b border-gray-500">
+								Descuento
+							</th>
+							<th className="p-4 font-medium border-b border-gray-500">
+								TCEA(%)
+							</th>
+							<th className="p-4 font-medium border-b border-gray-500">
+								Receptor
+							</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td colSpan={10} className="p-4">
+								<div className="px-3 py-1 text-lg font-bold leading-none text-center text-[#5756BB] rounded-full animate-pulse w-60"> Cargando facturas... </div>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			) : (
+				<div className="relative">
+					<Image
+						src="/cat3.png"
+						alt="Cats"
+						width={100}
+						height={100}
+						className="absolute top-[-86px] left-1/2 transform -translate-x-1/2 z-10"
+					/>
+					<FacturaTable facturas={currentInvoices} />
+				</div>
+			)}
 			<div className="flex items-center justify-between mt-4 space-x-4">
 				<button
 					type="button"

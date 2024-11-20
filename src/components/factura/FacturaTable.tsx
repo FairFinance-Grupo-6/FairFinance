@@ -68,12 +68,18 @@ export const FacturaTable: React.FC<FacturaTableProps> = ({ facturas }) => {
 					</tr>
 				</thead>
 				<tbody>
+					{facturas.length === 0 && (
+						<tr>
+							<td colSpan={10} className="p-4">
+								No hay facturas para mostrar
+							</td>
+						</tr>
+					)}
 					{facturas.map((invoice) => (
 						<tr
 							key={invoice.id}
-							className={`${
-								invoice.id % 2 === 0 ? "bg-purple-50" : "bg-white"
-							} border-b border-gray-300 hover:bg-purple-100 transition-all duration-300 cursor-pointer`}
+							className={`${invoice.id % 2 === 0 ? "bg-purple-50" : "bg-white"
+								} border-b border-gray-300 hover:bg-purple-100 transition-all duration-300 cursor-pointer`}
 							onClick={() => router.push(`/dashboard/facturas/${invoice.id}`)}
 							onKeyUp={(e) => {
 								if (e.key === "Enter" || e.key === " ") {

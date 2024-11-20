@@ -4,7 +4,7 @@
 
 import { useFactura } from "@/app/hooks/useFactura";
 import { useRouter } from "next/navigation";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 
 
@@ -49,7 +49,7 @@ export default function FacturaForm() {
       // Redirigir después de un breve retraso para mostrar el mensaje
       setTimeout(() => {
         router.push("/dashboard/facturas"); // Ajusta esta ruta a tu página de lista de facturas
-      }, 2000);
+      }, 1000);
     } catch (error) {
       console.error("Error al guardar la factura:", error);
       toast.error("Error al guardar la factura.", {
@@ -94,7 +94,6 @@ export default function FacturaForm() {
           handleCalculateTcea={handleCalculateTcea}
         />
       </form>
-      <ToastContainer />
     </>
   );
 }

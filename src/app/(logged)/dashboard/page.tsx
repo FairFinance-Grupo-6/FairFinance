@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Clock } from "lucide-react";
 import { useTheme } from "next-themes";
 import Link from "next/link";
 import Image from "next/image";
 import { supabase } from "@/utils/supabase/client";
+import { useFactura } from "@/app/hooks/useFactura";
 
 const mockUser = {
 	email: "usuario@example.com",
@@ -73,17 +74,21 @@ export default function Dashboard() {
 		.slice(0, 4);
 
 	if (!user) {
-		return <div>Loading...</div>;
+		return (
+			<div className="flex flex-col items-center justify-center space-y-4">
+				<h1 className="text-2xl font-semibold">Cargando...</h1>
+				<p className="text-gray-500">Por favor, espere un momento</p>
+			</div>
+		);
 	}
 
 	return (
 		<main className={"w-full mx-auto space-y-6 text-black pt-20"}>
 			<div className="flex items-center justify-between space-x-4">
 				<div>
-				<h1 className="text-2xl font-semibold text-black dark:text-white">
-					Bienvenido a tu Dashboard, {user.name}
-				</h1>
-
+					<h1 className="text-2xl font-semibold text-black dark:text-white">
+						Bienvenido a tu Dashboard, {user.name}
+					</h1>
 					<span className={`${styles.mutedText} font-normal`}>
 						Estas son tus facturas registradas
 					</span>

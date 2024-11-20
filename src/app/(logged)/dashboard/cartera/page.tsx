@@ -193,7 +193,12 @@ export default function BriefcasesPage() {
 									{invoice.fechaVencimiento}
 								</p>
 								<p>
-									<strong>TCEA:</strong> {invoice.tcea}%
+									<strong>TCEA:</strong>{" "}
+									{Number.parseFloat(invoice.tcea).toFixed(2)}%
+								</p>
+								<p>
+									<strong>Descuento:</strong>{" "}
+									{Number.parseFloat(invoice.descuento).toFixed(2)}
 								</p>
 							</div>
 						))}
