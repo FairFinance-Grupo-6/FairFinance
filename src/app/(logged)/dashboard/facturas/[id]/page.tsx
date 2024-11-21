@@ -56,43 +56,43 @@ export default function FacturaDetailsPage() {
 				<div className="grid grid-cols-2 gap-4 text-lg">
 					<div>
 						<p className="font-semibold text-[#5756BB]">Fecha de Emisión:</p>
-						<p>{invoice.fechaEmision}</p>
+						<p className="dark:text-[black]">{invoice.fechaEmision}</p>
 					</div>
 					<div>
 						<p className="font-semibold text-[#5756BB]">
 							Fecha de Vencimiento:
 						</p>
-						<p>{invoice.fechaVencimiento}</p>
+						<p className="dark:text-[black]">{invoice.fechaVencimiento}</p>
 					</div>
 					<div>
 						<p className="font-semibold text-[#5756BB]">Importe:</p>
-						<p>
+						<p className="dark:text-[black]">
 							{invoice.importeNominal} {invoice.moneda}
 						</p>
 					</div>
 					<div>
 						<p className="font-semibold text-[#5756BB]">Moneda:</p>
-						<p>{invoice.moneda}</p>
+						<p className="dark:text-[black]">{invoice.moneda}</p>
 					</div>
 					<div>
 						<p className="font-semibold text-[#5756BB]">Tipo de Tasa:</p>
-						<p>{invoice.tipoTasa}</p>
+						<p className="dark:text-[black]">{invoice.tipoTasa}</p>
 					</div>
 					<div>
 						<p className="font-semibold text-[#5756BB]">Tiempo Tasa:</p>
-						<p>{invoice.tiempoTasa}</p>
+						<p className="dark:text-[black]">{invoice.tiempoTasa}</p>
 					</div>
 					<div>
 						<p className="font-semibold text-[#5756BB]">Capitalización:</p>
-						<p>{invoice.capitalizacion}</p>
+						<p className="dark:text-[black]">{invoice.capitalizacion}</p>
 					</div>
 					<div>
 						<p className="font-semibold text-[#5756BB]">Valor Tasa:</p>
-						<p>{invoice.valorTasa}%</p>
+						<p className="dark:text-[black]">{invoice.valorTasa}%</p>
 					</div>
 					<div>
 						<p className="font-semibold text-[#5756BB]">Portes:</p>
-						<p>{invoice.portes}</p>
+						<p className="dark:text-[black]">{invoice.portes}</p>
 					</div>
 					{/*<div>
 						<p className="font-semibold text-[#5756BB]">Descuento:</p>
@@ -100,7 +100,7 @@ export default function FacturaDetailsPage() {
 					</div> */}
 					<div>
 						<p className="font-semibold text-[#5756BB]">TCEA:</p>
-						<p>{Number.parseFloat(invoice.tcea).toFixed(2)}%</p>
+						<p className="dark:text-[black]">{Number.parseFloat(invoice.tcea).toFixed(2)}%</p>
 					</div>
 				</div>
 			</div>

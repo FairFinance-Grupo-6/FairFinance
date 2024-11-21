@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Clock } from "lucide-react";
 import { useTheme } from "next-themes";
 import Link from "next/link";
 import Image from "next/image";
 import { supabase } from "@/utils/supabase/client";
+import { useFactura } from "@/app/hooks/useFactura";
 
 const mockUser = {
 	email: "usuario@example.com",
@@ -73,14 +74,19 @@ export default function Dashboard() {
 		.slice(0, 4);
 
 	if (!user) {
-		return <div>Loading...</div>;
+		return (
+			<div className="flex flex-col items-center justify-center space-y-4">
+				<h1 className="text-2xl font-semibold">Cargando...</h1>
+				<p className="text-gray-500">Por favor, espere un momento</p>
+			</div>
+		);
 	}
 
 	return (
 		<main className={"w-full mx-auto space-y-6 text-black pt-20"}>
 			<div className="flex items-center justify-between space-x-4">
 				<div>
-					<h1 className="text-2xl font-semibold">
+					<h1 className="text-2xl font-semibold text-black dark:text-white">
 						Bienvenido a tu Dashboard, {user.name}
 					</h1>
 					<span className={`${styles.mutedText} font-normal`}>
@@ -89,12 +95,13 @@ export default function Dashboard() {
 				</div>
 
 				<div className="flex flex-col items-center justify-center">
-					<Image
-						src="/cat1.png"
-						alt="Imagen de saludo"
-						width={110}
-						height={110}
-					/>
+				<Image
+					src={currentTheme === "dark" ? "/cat11.png" : "/cat1.png"}
+					alt="Imagen de saludo"
+					width={110}
+					height={110}
+				/>
+
 
 					<button
 						type="button"
@@ -112,14 +119,14 @@ export default function Dashboard() {
 				{sortedInvoices.map((invoice) => (
 					<div
 						key={invoice.id}
-						className="bg-white/30 backdrop-blur-lg rounded-lg p-6 space-y-4 shadow-lg"
+						className="bg-white/30 backdrop-blur-lg rounded-lg p-6 space-y-4 shadow-lg dark:bg-grey dark:bg-opacity-30"
 					>
 						{/* Fondo blurry y bordes redondeados */}
 						<div>
-							<div className="text-sm text-gray-500">
+							<div className="text-sm text-gray-500 dark:text-white">
 								Factura: {invoice.idFactura}
 							</div>
-							<div className="text-sm text-gray-500">
+							<div className="text-sm text-gray-500 dark:text-white">
 								Fecha de emisión: {invoice.fechaEmision}
 							</div>
 							<div className="text-xl font-semibold">
